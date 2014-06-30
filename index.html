@@ -1,0 +1,44 @@
+<html>
+  <head>
+    <title></title>
+    <script src='responsive.js'></script>
+    <style media="screen">
+      #container {
+        margin-top: 2000px;
+        width: 100%;
+      }
+      .responsive {
+        width: 100%;
+      }
+    </style>
+    <script>
+    </script>
+  </head>
+  <body>
+    <input type='button' id='btn-add' value="add image"></input>
+    <div id='container'>
+      <img class='responsive' src='http://s7d9.scene7.com/is/image/DEMOAKQA/1440.1?qlt=90'
+        data-src="http://s7d9.scene7.com/is/image/DEMOAKQA/1440.1?resMode=sharp2&qlt=85"
+        data-src-1="&qlt=60" data-src-2="&qlt=70" data-src-3="&qlt=80" data-src-4="&qlt=90" data-src-5="&qlt=100">
+    </div> 
+  </body>
+
+  <script>
+    var index = 1;
+    document.getElementById('btn-add').onclick = function() {
+      index = ++index;
+      var container = document.getElementById('container');
+      var img = document.createElement('img');
+      img.className = 'responsive';
+      img.dataset.src = 'http://s7d9.scene7.com/is/image/DEMOAKQA/1440.' + index + '?resMode=sharp2&qlt=85';
+      img.src = 'http://s7d9.scene7.com/is/image/DEMOAKQA/1440.' + index;
+      img.dataset['src-1'] = "&qlt=60";
+      img.dataset['src-2'] = "&qlt=60";
+      img.dataset['src-3'] = "&qlt=60";
+      img.dataset['src-4'] = "&qlt=60";
+      img.dataset['src-5'] = "&qlt=60";
+      container.insertBefore(img, container.firstChild);
+    };
+    window.Responsify.init();
+  </script>
+</html>
