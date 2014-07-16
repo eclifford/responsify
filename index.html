@@ -1,44 +1,46 @@
 <html>
   <head>
     <title></title>
-    <script src='responsive.js'></script>
-    <style media="screen">
-      #container {
-        margin-top: 2000px;
-        width: 100%;
-      }
+    <script src='responsify.js'></script>
+    <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.css" media="screen" title="no title" charset="utf-8">
+    <style>
       .responsive {
         width: 100%;
       }
     </style>
-    <script>
-    </script>
   </head>
   <body>
-    <input type='button' id='btn-add' value="add image"></input>
-    <div id='container'>
-      <img class='responsive' src='http://s7d9.scene7.com/is/image/DEMOAKQA/1440.1?qlt=90'
-        data-src="http://s7d9.scene7.com/is/image/DEMOAKQA/1440.1?resMode=sharp2&qlt=85"
-        data-src-1="&qlt=60" data-src-2="&qlt=70" data-src-3="&qlt=80" data-src-4="&qlt=90" data-src-5="&qlt=100">
-    </div> 
-  </body>
-
-  <script>
-    var index = 1;
-    document.getElementById('btn-add').onclick = function() {
-      index = ++index;
-      var container = document.getElementById('container');
-      var img = document.createElement('img');
-      img.className = 'responsive';
-      img.dataset.src = 'http://s7d9.scene7.com/is/image/DEMOAKQA/1440.' + index + '?resMode=sharp2&qlt=85';
-      img.src = 'http://s7d9.scene7.com/is/image/DEMOAKQA/1440.' + index;
-      img.dataset['src-1'] = "&qlt=60";
-      img.dataset['src-2'] = "&qlt=60";
-      img.dataset['src-3'] = "&qlt=60";
-      img.dataset['src-4'] = "&qlt=60";
-      img.dataset['src-5'] = "&qlt=60";
-      container.insertBefore(img, container.firstChild);
+    <div class='container-fluid'>
+      <div class="row">
+        <div class="col-md-12">
+          <img class='responsive' src='http://s7d9.scene7.com/is/image/DEMOAKQA/1440.1'
+          data-src="http://s7d9.scene7.com/is/image/DEMOAKQA/1440.1?resMode=sharp2&qlt=85"
+          />
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-4"><img class='responsive' src='http://s7d9.scene7.com/is/image/DEMOAKQA/1440.2?qlt=90'
+          data-src="http://s7d9.scene7.com/is/image/DEMOAKQA/1440.2?resMode=sharp2&qlt=85"></div>
+        <div class="col-md-4"><img class='responsive' src='http://s7d9.scene7.com/is/image/DEMOAKQA/1440.3?qlt=90'
+          data-src="http://s7d9.scene7.com/is/image/DEMOAKQA/1440.3?resMode=sharp2&qlt=85"></div>
+        <div class="col-md-4"><img class='responsive' src='http://s7d9.scene7.com/is/image/DEMOAKQA/1440.4?qlt=90'
+          data-src="http://s7d9.scene7.com/is/image/DEMOAKQA/1440.4?resMode=sharp2&qlt=85"></div>
+      </div>
+      <div class="row">
+        <div class="col-md-6"><img class='responsive' src='http://s7d9.scene7.com/is/image/DEMOAKQA/1440.5?qlt=90'
+          data-src="http://s7d9.scene7.com/is/image/DEMOAKQA/1440.5?resMode=sharp2&qlt=85"></div>
+        <div class="col-md-6"><img class='responsive' src='http://s7d9.scene7.com/is/image/DEMOAKQA/1440.6?qlt=90'
+          data-src="http://s7d9.scene7.com/is/image/DEMOAKQA/1440.6?resMode=sharp2&qlt=85"></div>
+      </div>
+      <div class="row">
+        <div class="col-md-12"><img class='responsive' src='http://s7d9.scene7.com/is/image/DEMOAKQA/1440.7?qlt=90'
+          data-src="http://s7d9.scene7.com/is/image/DEMOAKQA/1440.7?resMode=sharp2&qlt=85"></div>
+      </div>
+    </div>
+    <script>
+    window.onload = function() {
+      Responsify.init();
     };
-    window.Responsify.init();
-  </script>
+    </script>
+  </body>
 </html>

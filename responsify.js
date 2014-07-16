@@ -9,10 +9,9 @@
   - detect scroll (debounced) detect newly visible images and rendered them properly
   - image elements will use data-src-n approach for query parameter and will use src attribute
   for default low res versions of images
-  - Will require polyfill (https://github.com/Polymer/MutationObservers) for IE9/10
+  - Will require polyfill (https://github.com/Polymer/MutationObservers) for IE10
 */
 (function(root, factory) {
-
   if (typeof define === 'function' && define.amd) {
     define([], function() {
       return (root.Responsify = factory(root));
@@ -22,91 +21,147 @@
   } else {
     root.Responsify = factory(root);
   }
-
 }(this, function(root) {
   'use strict';
 
   var Responsify = {
     version: '0.0.1',
 
-    debug: true,
-
-    imagesOffScreen: [],
-
-    images: [{
-      node: {},
-      visible: true
-    }],
-
-    breakpoints: ['480', '768', '1024', '1280', '1440'],
+    breakpoints: ['750', '970', '1170', '1600'],
 
     activeBreakpoint: null,
 
-    init: function() {
-      var self = this;
-      this.processImages();
-      this.onImageMutationEvent(function(node) {
-        self.processImage(node);
-      });
+    images: [],
 
+    debounceDelay: 300,
+
+    selector: 'img.responsive',
+
+    init: function(config) {
+      var self = this;
+
+      // override defaults
+      if(config) {
+        this.setConfig(config);
+      }
+
+      // get the current breakpoint
       this.activeBreakpoint = this.getClosestBreakpoint();
 
-      this.onScrollEvent(function() {
-        self.processImages();
+      // get images
+      this.images = document.getElementsByClassName('responsive');
+
+      this.processImages(this.images);
+
+      // listen for images added to the DOM
+      this.onImageLoaded(function(img) {
+        // store image
+        self.images.push(img);
+
+        // if image is visible render it
+        if (self.isImageOnScreen(img)) {
+          self.processImage(img);
+        }
       });
 
+      // on debounced scroll event process
+      // all newly visible images
+      this.onScrollEvent(function() {
+        self.processImages(self.images);
+      });
+
+      // on debounced resize event process
+      // all images if a breakpoint change has occurred
       this.onResizeEvent(function() {
         var currentBreakpoint = self.getClosestBreakpoint();
         if (currentBreakpoint != self.activeBreakpoint) {
           self.activeBreakpoint = currentBreakpoint;
-          self.processImages();
+          self.processImages(self.images);
         }
       });
     },
 
+    setConfig: function(config) {
+      if(config.breakpoints !== 'undefined' && config.breakpoints !== null) {
+        this.breakpoints = config.breakpoints;
+      }
+    },
+
+    // get the closest breakpoint based on the current window width
     getClosestBreakpoint: function() {
       var viewport = window.innerWidth;
 
-      for(var i = 0; i < this.breakpoints.length; i ++) {
-        if(viewport <= this.breakpoints[0]) {
-          return 0;
-        }
+      // if the window is smaller than the our smallest breakpoint
+      if(viewport <= this.breakpoints[0]) {
+        return 0;
+      }
+
+      // if the window is larger than our largest breakpoint
+      if(viewport >= this.breakpoints[this.breakpoints.length-1]) {
+        return this.breakpoints.length - 1;
+      }
+
+      // enumerate breakpoints searching for closest breakpoint that is larger
+      for(var i = 0; i < this.breakpoints.length; i++) {
         if(viewport <= this.breakpoints[i] && viewport > this.breakpoints[i-1]) {
-          return i;
+          return i + 1;
         }
       }
     },
 
-    processImages: function() {
-      var images = document.getElementsByClassName('responsive');
-
+    // enumerate all the images and process those that are visible
+    processImages: function(images) {
       for(var i = 0; i < images.length; i++) {
-        this.processImage(images[i]);
+        if(this.isImageOnScreen(images[i])) {
+          this.processImage(images[i]);
+        }
       }
     },
 
+    // given a uri add or update an existing querystring with the
+    // provided key and value
+    addUpdateQueryStringParameter: function(uri, key, value) {
+      var re = new RegExp("([?&])" + key + "=.*?(&|$)", "i");
+      var separator = uri.indexOf('?') !== -1 ? "&" : "?";
+      if (uri.match(re)) {
+        return uri.replace(re, '$1' + key + "=" + value + '$2');
+      }
+      else {
+        return uri + separator + key + "=" + value;
+      }
+    },
+
+    // convert the parameterized part of a URI into an object
+    parseQueryStringToObj: function(uri) {
+      var obj = {};
+      if(!uri) return {};
+      uri.replace(
+        new RegExp("([^?=&]+)(=([^&]*))?", "g"),
+        function($0, $1, $2, $3) { obj[$1] = $3; }
+      );
+      return obj;
+    },
+
+    // update an images src attribute with base parameters and computed width
     processImage: function(img) {
-      if(this.isImageOnScreen(img)) {
-        this.log('image processed');
-        // get data-src-1
-        var src = img.dataset.src;
-        var params = img.dataset["src-" + (this.activeBreakpoint + 1)];
-        var width = img.parentElement.clientWidth;
-        img.src = src + "&wid=" + width;
+      var src = img.dataset.src;
+      var params = this.parseQueryStringToObj(img.dataset["src-" + (this.activeBreakpoint + 1)]);
+
+      // append params
+      for(var param in params) {
+        src = this.addUpdateQueryStringParameter(src, param, params[param]);
       }
-      // img.src = img.dataset.src += '?resMode=sharp2&wid=' + img.parentElement.clientWidth;
+
+      // add computer width
+      src = this.addUpdateQueryStringParameter(src, "wid", img.parentElement.clientWidth);
+
+      // finally assign the updated src if it has changed
+      if(img.src !== src) {
+        img.src = src;
+      }
     },
 
-    processVisibleImages: function() {
-      var visibleImages = this.images.filter(function(img) {
-        return img.visible;
-      });
-
-      visibleImages.forEach(function(img) {
-        img.element.src = img.element.src += '?resMode=sharp2&wid=' + img.element.parentElement.clientWidth;
-      });
-    },
-
+    // detect whether or not a dom element is within the viewport
     isImageOnScreen: function(element) {
       var elementRect = element.getBoundingClientRect();
       var viewportHeight = document.body.clientHeight;
@@ -117,19 +172,20 @@
         return false;
     },
 
+    // listen for scroll events debounced and trigger callback
     onScrollEvent: function(callback) {
-      var self = this;
       window.addEventListener("scroll", this.debounce(function() {
         callback();
-      }, 500));
+      }, this.debounceDelay));
     },
 
-    onImageMutationEvent: function(callback) {
+    // mutation observer that listens for new nodes of type IMG
+    // once detected trigger callback
+    onImageLoaded: function(callback) {
       var MutationObserver = window.MutationObserver || window.WebKitMutationObserver || window.MozMutationObserver;
 
       var observer = new MutationObserver(function (mutations) {
         mutations.forEach(function (mutation) {
-          console.log('mutation');
           if (mutation.addedNodes) {
             for (var i = 0; i < mutation.addedNodes.length; i++) {
               var node = mutation.addedNodes[i];
@@ -147,22 +203,14 @@
       });
     },
 
-    // Listen for resize events
+    // Listen for resize events debounced and trigger resize callback
     onResizeEvent: function(callback) {
-      var self = this;
       window.addEventListener("resize", this.debounce(function() {
-        self.log('resize event fired');
         callback();
-      }, 500));
+      }, this.debounceDelay));
     },
 
-
-    log: function(message) {
-      if(this.debug) {
-        console.log(message);
-      }
-    },
-
+    // underscore.js debounce method
     debounce: function(func, wait, immediate) {
       var timeout, args, context, timestamp, result;
 
