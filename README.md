@@ -1,4 +1,4 @@
-# Responsify  [![Build Status](https://travis-ci.org/eclifford/bronson.svg?branch=master)](https://travis-ci.org/eclifford/bronson) [![Coverage Status](https://coveralls.io/repos/eclifford/bronson/badge.png?branch=master)](https://coveralls.io/r/eclifford/bronson?branch=master)
+# Responsify  [![Build Status](https://travis-ci.org/eclifford/responsify.svg?branch=master)](https://travis-ci.org/eclifford/responsify) [![Coverage Status](https://coveralls.io/repos/eclifford/responsify/badge.png?branch=master)](https://coveralls.io/r/eclifford/responsify?branch=master)
 
 > Responsify.js is a src-N based responsive image solution intended to be used
 with parameter based responsive image services such as Adobe Scene7

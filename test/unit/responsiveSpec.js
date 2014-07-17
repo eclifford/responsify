@@ -29,21 +29,21 @@ describe("responsify", function() {
     it("processImage()", function() {
       var imgA = $('#a')[0];
       Responsify.processImage(imgA);
-      expect(imgA.src).to.equal('http://s7d9.scene7.com/is/image/DEMOAKQA/1440.1?resMode=sharp2&qlt=85&wid=400');
+      expect(imgA.src).to.equal('http://s7d9.scene7.com/is/image/DEMOAKQA/1440.1?resMode=sharp2&qlt=85&wid=384');
 
       var imgB = $('#b')[0];
       Responsify.processImage(imgB);
-      expect(imgB.src).to.equal('http://s7d9.scene7.com/is/image/DEMOAKQA/1440.2?resMode=sharp2&qlt=85&wid=400');
+      expect(imgB.src).to.equal('http://s7d9.scene7.com/is/image/DEMOAKQA/1440.2?resMode=sharp2&qlt=85&wid=384');
     });
 
     it("isImageOnScreen()", function() {
       var imgA = $('#a')[0];
       var onScreen = Responsify.isImageOnScreen(imgA);
-      expect(onScreen).to.equal(true);
+      expect(onScreen).to.equal(false);
 
       var imgB = $('#b')[0];
       onScreen = Responsify.isImageOnScreen(imgB);
-      expect(onScreen).to.equal(true);
+      expect(onScreen).to.equal(false);
 
       var imgC = $('#c')[0];
       onScreen = Responsify.isImageOnScreen(imgC);

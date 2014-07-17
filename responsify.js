@@ -1,16 +1,12 @@
-/*
-  Responsify
-  - don't block me bro ('don't require this script to be a blocking script in the head')
-  - don't require third party libs (jQuery, ImagesLoaded, Underscore)
-  - detect resize (debounced) and use crop parameters to select appropriate images for breakpoint
-  - responsive images are the size of their containing elements
-  - images added to dom post page load should be detected and rendered properly
-  - images not currently visible in viewport should not be rendered
-  - detect scroll (debounced) detect newly visible images and rendered them properly
-  - image elements will use data-src-n approach for query parameter and will use src attribute
-  for default low res versions of images
-  - Will require polyfill (https://github.com/Polymer/MutationObservers) for IE10
-*/
+/*!
+ * Responsify
+ * http://github.com/eclifford/responsify
+ *
+ * Author: Eric Clifford
+ * Email: ericgclifford@gmail.com
+ * Date: 06.18.2014
+ *
+ */
 (function(root, factory) {
   if (typeof define === 'function' && define.amd) {
     define([], function() {
