@@ -21,7 +21,7 @@
   'use strict';
 
   var Responsify = {
-    version: '0.0.1',
+    version: '0.0.2',
 
     breakpoints: ['750', '970', '1170', '1600'],
 

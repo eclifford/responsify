@@ -36,45 +36,29 @@ module.exports = function(grunt) {
         browsers: ['PhantomJS'],
         singleRun: true
       }
+    },
+    replace: {
+      dist: {
+        src: ['responsify.js'],
+        overwrite: true,
+        replacements: [{
+          from: /version:.'[0-9]+.[0-9]+.[0-9]+'/g,
+          to: "version: '<%= pkg.version %>'"
+        }]
+      }
+    },
+    bump: {
+      files: ['package.json', 'bower.json']
     }
-    // bump: {
-    //   options: {
-    //     files: ['package.json', 'bower.json'],
-    //     commit: false,
-    //     createTag: false,
-    //     push: false
-    //   }
-    // },
-    // release: {
-    //   options: {
-    //     file: '--all',
-    //     npm: false,
-    //     bump: true,
-    //     github: {
-    //       repo: 'eclifford/bronson',
-    //       usernameVar: 'GITHUB_USERNAME',
-    //       passwordVar: 'GITHUB_PASSWORD'
-    //     }
-    //   }
-    // },
-    // replace: {
-    //   dist: {
-    //     src: ['bronson.js'],
-    //     overwrite: true,
-    //     replacements: [{
-    //       from: /version:.'[0-9]+.[0-9]+.[0-9]+'/g,
-    //       to: "version: '<%= pkg.version %>'"
-    //     }]
-    //   }
-    // }
   });
 
   grunt.loadNpmTasks('grunt-karma');
   grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-contrib-uglify');
+  grunt.loadNpmTasks('grunt-text-replace');
+  grunt.loadNpmTasks('grunt-bump');
 
-  // grunt.registerTask('default', ['karma:unit:start', 'watch']);
-  // grunt.registerTask('build', ['jshint', 'uglify']);
-  // grunt.registerTask('deploy', ['replace', 'build', 'release']);
+  grunt.registerTask('build', ['jshint', 'bump', 'replace', 'uglify']);
+
 };
