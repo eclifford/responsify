@@ -99,7 +99,7 @@ Set custom breakpoints by passing them to `init`
 ```js
 window.onload = function() {
   Responsify.init({
-    breakpoints: ['100', '200', '300', '400']
+    breakpoints: ['750', '970', '1170', '1600']
   });
 }
 ```
@@ -112,7 +112,7 @@ better performance.
 ```js
 window.onload = function() {
   Responsify.init({
-    debounceDelay: 100
+    debounceDelay: 300
   });
 }
 ```
