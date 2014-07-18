@@ -14,7 +14,7 @@
     "type": "git",
     "url": "https://github.com/eclifford/responsify.git"
   },
-  "license": "ISC",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/eclifford/responsify/issues"
   },

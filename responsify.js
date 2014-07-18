@@ -4,7 +4,7 @@
  *
  * Author: Eric Clifford
  * Email: ericgclifford@gmail.com
- * Date: 06.18.2014
+ * Date: 06.17.2014
  *
  */
 (function(root, factory) {
@@ -38,20 +38,19 @@
 
       // override defaults
       if(config) {
-        this.setConfig(config);
+        this.extend(this, config);
       }
 
       // get the current breakpoint
       this.activeBreakpoint = this.getClosestBreakpoint();
 
-      // get images
-      this.images = document.getElementsByClassName('responsive');
+      // get all responsive images by selector converting
+      this.images = [].slice.call(document.querySelectorAll(this.selector));
 
       this.processImages(this.images);
 
       // listen for images added to the DOM
       this.onImageLoaded(function(img) {
-        // store image
         self.images.push(img);
 
         // if image is visible render it
@@ -75,12 +74,6 @@
           self.processImages(self.images);
         }
       });
-    },
-
-    setConfig: function(config) {
-      if(config.breakpoints !== 'undefined' && config.breakpoints !== null) {
-        this.breakpoints = config.breakpoints;
-      }
     },
 
     // get the closest breakpoint based on the current window width
@@ -204,6 +197,20 @@
       window.addEventListener("resize", this.debounce(function() {
         callback();
       }, this.debounceDelay));
+    },
+
+    // Simple deep extend with array overwrite
+    extend: function(target, source) {
+      target = target || {};
+      for (var prop in source) {
+        if (typeof source[prop] === 'object' && Object.prototype.toString.call(source[prop]) !== '[object Array]') {
+          console.log(source[prop]);
+          target[prop] = this.extend(target[prop], source[prop]);
+        } else {
+          target[prop] = source[prop];
+        }
+      }
+      return target;
     },
 
     // underscore.js debounce method
