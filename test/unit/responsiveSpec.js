@@ -19,6 +19,17 @@ describe("responsify", function() {
     });
   });
 
+
+  describe("helpers", function() {
+    it("getClosestBreakpoint()", function() {
+      var A = Responsify.getClosestBreakpoint(0);
+      expect(A.label).to.equal('A');
+
+      var B = Responsify.getClosestBreakpoint(751);
+      expect(B.label).to.equal('B');
+    });
+  });
+
   describe("images", function() {
     before(function(done) {
       $('body').load('base/test/fixtures/images.html', function() {

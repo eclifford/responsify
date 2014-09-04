@@ -8,18 +8,23 @@
         width: 100%;
       }
     </style>
+    <script>
+      Responsify.init();
+    </script>
   </head>
   <body>
     <input type='button' id='btn-add' value="add image"></input>
     <div class='container-fluid' id='container'>
       <div class="row">
         <div class="col-md-12">
-          <img class='responsive' src='http://s7d9.scene7.com/is/image/DEMOAKQA/1440.1'
-            data-src="http://s7d9.scene7.com/is/image/DEMOAKQA/1440.1?resMode=sharp2&qlt=85"
-          />
+          <div>
+            <img class='responsive'
+              data-src="http://s7d9.scene7.com/is/image/DEMOAKQA/1440.1?resMode=sharp2&qlt=85"
+            />
+          </div>
         </div>
       </div>
-      <div class="row">
+      <!-- <div class="row">
         <div class="col-md-4"><img class='responsive' src='http://s7d9.scene7.com/is/image/DEMOAKQA/1440.2'
           data-src="http://s7d9.scene7.com/is/image/DEMOAKQA/1440.2?resMode=sharp2&qlt=85"></div>
         <div class="col-md-4"><img class='responsive' src='http://s7d9.scene7.com/is/image/DEMOAKQA/1440.3'
@@ -44,7 +49,7 @@
           data-src="http://s7d9.scene7.com/is/image/DEMOAKQA/1440.9?resMode=sharp2&qlt=85"></div>
         <div class="col-md-4"><img class='responsive' src='http://s7d9.scene7.com/is/image/DEMOAKQA/1440.10'
           data-src="http://s7d9.scene7.com/is/image/DEMOAKQA/1440.10?resMode=sharp2&qlt=85"></div>
-      </div>
+      </div>-->
     </div>
     <script>
       var index = 1;
@@ -57,9 +62,9 @@
          img.src = 'http://s7d9.scene7.com/is/image/DEMOAKQA/1440.' + index;
          container.insertBefore(img, container.firstChild);
        };
-      window.onload = function() {
-        Responsify.init();
-      };
+      // window.onload = function() {
+      //   Responsify.init();
+      // };
     </script>
   </body>
 </html>

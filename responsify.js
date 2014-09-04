@@ -23,7 +23,38 @@
   var Responsify = {
     version: '0.0.2',
 
-    breakpoints: ['750', '970', '1170', '1600'],
+    breakpoints: [
+      {
+        label: 'break-a',
+        device: 'mobile',
+        enter: 0,
+        exit: 750
+      },
+      {
+        label: 'break-b',
+        device: 'tablet',
+        enter: 751,
+        exit: 970
+      },
+      {
+        label: 'break-c',
+        device: 'desktop',
+        enter: 971,
+        exit: 1170
+      },
+      {
+        label: 'break-d',
+        device: 'desktop',
+        enter: 1171,
+        exit: 1600
+      },
+      {
+        label: 'break-e',
+        device: 'desktop',
+        enter: 1601,
+        exit: 10000
+      },
+    ],
 
     activeBreakpoint: null,
 
@@ -42,7 +73,7 @@
       }
 
       // get the current breakpoint
-      this.activeBreakpoint = this.getClosestBreakpoint();
+      this.activeBreakpoint = this.getClosestBreakpoint(window.innerWidth);
 
       // get all responsive images by selector converting
       this.images = [].slice.call(document.querySelectorAll(this.selector));
@@ -77,23 +108,11 @@
     },
 
     // get the closest breakpoint based on the current window width
-    getClosestBreakpoint: function() {
-      var viewport = window.innerWidth;
-
-      // if the window is smaller than the our smallest breakpoint
-      if(viewport <= this.breakpoints[0]) {
-        return 0;
-      }
-
-      // if the window is larger than our largest breakpoint
-      if(viewport >= this.breakpoints[this.breakpoints.length-1]) {
-        return this.breakpoints.length - 1;
-      }
-
+    getClosestBreakpoint: function(width) {
       // enumerate breakpoints searching for closest breakpoint that is larger
       for(var i = 0; i < this.breakpoints.length; i++) {
-        if(viewport <= this.breakpoints[i] && viewport > this.breakpoints[i-1]) {
-          return i + 1;
+        if(width >= this.breakpoints[i].enter && width <= this.breakpoints[i].exit) {
+          return this.breakpoints[i];
         }
       }
     },
@@ -161,6 +180,10 @@
         return false;
     },
 
+    onBreakpointChange: function(callback) {
+      // callbreakpoint
+    },
+
     // listen for scroll events debounced and trigger callback
     onScrollEvent: function(callback) {
       window.addEventListener("scroll", this.debounce(function() {
@@ -178,9 +201,16 @@
           if (mutation.addedNodes) {
             for (var i = 0; i < mutation.addedNodes.length; i++) {
               var node = mutation.addedNodes[i];
-              if (node.nodeType == 1 && node.tagName == "IMG") {
-                callback(node);
+              if (typeof node.getElementsByTagName !== 'function') {
+                return;
               }
+              var imgs = node.getElementsByTagName('img');
+              for (var x = 0; x < imgs.length; x++) {
+                callback(imgs[x]);
+              }
+              // if (node.nodeType == 1 && node.tagName == "IMG") {
+              //   callback(node);
+              // }
             }
           }
         });
@@ -190,6 +220,11 @@
         childList: true,
         subtree: true
       });
+    },
+
+    isDeviceEqualTo: function(device) {
+      return false;
+      // return this.activeBreakpoint.device === device;
     },
 
     // Listen for resize events debounced and trigger resize callback
@@ -247,6 +282,8 @@
       };
     }
   };
-
+  window.Responsive = {};
+  window.Responsive.Breakpoint = {};
+  window.Responsive.Breakpoint.isDeviceEqualTo = Responsify.isDeviceEqualTo;
   return Responsify;
 }));
