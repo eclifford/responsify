@@ -9,7 +9,9 @@
       }
     </style>
     <script>
-      Responsify.init();
+      window.onload = function () {
+        Responsify.init();
+      };
     </script>
   </head>
   <body>
@@ -62,9 +64,7 @@
          img.src = 'http://s7d9.scene7.com/is/image/DEMOAKQA/1440.' + index;
          container.insertBefore(img, container.firstChild);
        };
-      // window.onload = function() {
-      //   Responsify.init();
-      // };
+
     </script>
   </body>
 </html>

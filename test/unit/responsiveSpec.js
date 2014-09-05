@@ -16,6 +16,17 @@ describe("responsify", function() {
         "foo": "bar",
         "baz": "foo"
       });
+
+      paramObj = Responsify.parseQueryStringToObj("foo=baz&baz=foo");
+      expect(paramObj).to.deep.equal({
+        "foo": "baz",
+        "baz": "foo"
+      });
+
+      paramObj = Responsify.parseQueryStringToObj("foo=baz");
+      expect(paramObj).to.deep.equal({
+        "foo": "baz"
+      });
     });
   });
 
@@ -23,10 +34,10 @@ describe("responsify", function() {
   describe("helpers", function() {
     it("getClosestBreakpoint()", function() {
       var A = Responsify.getClosestBreakpoint(0);
-      expect(A.label).to.equal('A');
+      expect(A.label).to.equal('break-a');
 
       var B = Responsify.getClosestBreakpoint(751);
-      expect(B.label).to.equal('B');
+      expect(B.label).to.equal('break-b');
     });
   });
 
@@ -35,6 +46,12 @@ describe("responsify", function() {
       $('body').load('base/test/fixtures/images.html', function() {
         done();
       });
+
+      Responsify.activeBreakpoint = {
+        label: 'break-a',
+        enter: 0,
+        exit: 751
+      };
     });
 
     it("processImage()", function() {
@@ -47,19 +64,19 @@ describe("responsify", function() {
       expect(imgB.src).to.equal('http://s7d9.scene7.com/is/image/DEMOAKQA/1440.2?resMode=sharp2&qlt=85&wid=384');
     });
 
-    it("isImageOnScreen()", function() {
-      var imgA = $('#a')[0];
-      var onScreen = Responsify.isImageOnScreen(imgA);
-      expect(onScreen).to.equal(false);
-
-      var imgB = $('#b')[0];
-      onScreen = Responsify.isImageOnScreen(imgB);
-      expect(onScreen).to.equal(false);
-
-      var imgC = $('#c')[0];
-      onScreen = Responsify.isImageOnScreen(imgC);
-      expect(onScreen).to.equal(false);
-    });
+    // it("isImageOnScreen()", function() {
+    //   var imgA = $('#a')[0];
+    //   var onScreen = Responsify.isImageOnScreen(imgA);
+    //   expect(onScreen).to.equal(false);
+    //
+    //   var imgB = $('#b')[0];
+    //   onScreen = Responsify.isImageOnScreen(imgB);
+    //   expect(onScreen).to.equal(false);
+    //
+    //   var imgC = $('#c')[0];
+    //   onScreen = Responsify.isImageOnScreen(imgC);
+    //   expect(onScreen).to.equal(false);
+    // });
   });
 
 });

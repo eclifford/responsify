@@ -21,113 +21,200 @@
   'use strict';
 
   var Responsify = {
-    version: '0.0.2',
+    version: '0.0.3',
 
-    breakpoints: [
-      {
-        label: 'break-a',
-        device: 'mobile',
-        enter: 0,
-        exit: 750
-      },
-      {
-        label: 'break-b',
-        device: 'tablet',
-        enter: 751,
-        exit: 970
-      },
-      {
-        label: 'break-c',
-        device: 'desktop',
-        enter: 971,
-        exit: 1170
-      },
-      {
-        label: 'break-d',
-        device: 'desktop',
-        enter: 1171,
-        exit: 1600
-      },
-      {
-        label: 'break-e',
-        device: 'desktop',
-        enter: 1601,
-        exit: 10000
-      },
-    ],
+    // default options
+    options: {
+      debug: true,                // enable console output
+      selector: 'img.responsive', // query selector to find images
+      root: document,             // node for mutation observer to listen on
+      debounceDelay: 300,         // how often to query events
+      breakpoints: [
+        {
+          label: 'break-a',
+          device: 'mobile',
+          enter: 0,
+          exit: 750
+        },
+        {
+          label: 'break-b',
+          device: 'tablet',
+          enter: 751,
+          exit: 970
+        },
+        {
+          label: 'break-c',
+          device: 'desktop',
+          enter: 971,
+          exit: 1170
+        },
+        {
+          label: 'break-d',
+          device: 'desktop',
+          enter: 1171,
+          exit: 1600
+        },
+        {
+          label: 'break-e',
+          device: 'desktop',
+          enter: 1601,
+          exit: 10000
+        },
+      ],
+    },
 
     activeBreakpoint: null,
 
     images: [],
 
-    debounceDelay: 300,
+    events: {},
 
-    selector: 'img.responsive',
-
+    // responsify initialize
+    // call this once your DOM has been created
+    //
+    // @param [object] config - override default settings object
+    //
     init: function(config) {
-      var self = this;
-
-      // override defaults
-      if(config) {
-        this.extend(this, config);
-      }
+      // override default options
+      if(config) this.extend(this.options, config);
 
       // get the current breakpoint
       this.activeBreakpoint = this.getClosestBreakpoint(window.innerWidth);
 
       // get all responsive images by selector converting
-      this.images = [].slice.call(document.querySelectorAll(this.selector));
+      this.images = [].slice.call(document.querySelectorAll(this.options.selector));
 
+      // register all events
+      this.setupEvents();
+
+      // handle auto debugging
+      if(this.options.debug) this.setupDebug();
+
+      // process all images currently in DOM
       this.processImages(this.images);
+    },
+    // find every method on in the library and append some automatic console
+    // output before and after execution
+    //
+    setupDebug: function() {
+      var self = this;
+      var funcs = Object.getOwnPropertyNames(this).forEach(function(property) {
+        if (typeof self[property] != 'function')
+          return;
 
-      // listen for images added to the DOM
-      this.onImageLoaded(function(img) {
-        self.images.push(img);
-
-        // if image is visible render it
-        if (self.isImageOnScreen(img)) {
-          self.processImage(img);
-        }
-      });
-
-      // on debounced scroll event process
-      // all newly visible images
-      this.onScrollEvent(function() {
-        self.processImages(self.images);
-      });
-
-      // on debounced resize event process
-      // all images if a breakpoint change has occurred
-      this.onResizeEvent(function() {
-        var currentBreakpoint = self.getClosestBreakpoint();
-        if (currentBreakpoint != self.activeBreakpoint) {
-          self.activeBreakpoint = currentBreakpoint;
-          self.processImages(self.images);
-        }
+        var func = self[property];
+        self[property] = function() {
+          console.groupCollapsed("Responsify: %s", property, arguments);
+          console.time('time');
+          var value = func.apply(self, arguments);
+          console.timeEnd('time');
+          console.groupEnd();
+          return value;
+        };
       });
     },
+    // setup DOM and custom events
+    //
+    setupEvents: function() {
+      var self = this;
 
-    // get the closest breakpoint based on the current window width
+      window.addEventListener("resize", this.debounce(function() {
+        self.onResizeEvent();
+      }, this.options.debounceDelay));
+
+      // window.addEventListener("scroll", this.debounce(function() {
+      //   self.onScrollEvent();
+      // }, this.options.debounceDelay));
+
+      // setup watcher to listen for future images inserted into DOM
+      this.setupMutationObserver(function(img) {
+        self.onImageDetected(img);
+      });
+    },
+    // once image is detected by mutation observor we process it
+    //
+    // @param [node] img - the image that was added to dom
+    //
+    onImageDetected: function(img) {
+      this.images.push(img);
+      this.processImage(img);
+    },
+    // listen for scroll event and process images
+    //
+    onScrollEvent: function() {
+      this.processImages();
+    },
+    // on a resize event determine if we have entered a new breakpoint and if so
+    // notify subscribers and process images
+    //
+    // FIXME: should probably only process images if breakpoint is greater than
+    // previous
+    //
+    onResizeEvent: function() {
+      var currentBreakpoint = this.getClosestBreakpoint(window.innerWidth);
+      if (currentBreakpoint != this.activeBreakpoint) {
+        this.publish('breakpoint:change', currentBreakpoint);
+        this.activeBreakpoint = currentBreakpoint;
+        this.processImages(this.images);
+      }
+    },
+    // provided the current width of window return the closest matching
+    // breakpoint
+    //
+    // @param [int] width - the width to calculate breakpoint based upon
+    //
     getClosestBreakpoint: function(width) {
       // enumerate breakpoints searching for closest breakpoint that is larger
-      for(var i = 0; i < this.breakpoints.length; i++) {
-        if(width >= this.breakpoints[i].enter && width <= this.breakpoints[i].exit) {
-          return this.breakpoints[i];
+      for (var i = 0; i < this.options.breakpoints.length; i++) {
+        if (width >= this.options.breakpoints[i].enter && width <= this.options.breakpoints[i].exit) {
+          return this.options.breakpoints[i];
         }
       }
     },
-
-    // enumerate all the images and process those that are visible
+    // process all currently stored images
+    //
+    // @param [Array] images - the images to process
+    //
     processImages: function(images) {
       for(var i = 0; i < images.length; i++) {
-        if(this.isImageOnScreen(images[i])) {
-          this.processImage(images[i]);
-        }
+        this.processImage(images[i]);
       }
     },
+    // update an images src attribute with base parameters and computed width
+    //
+    // @param [node] img - the image to process
+    //
+    processImage: function(img) {
+      if (!this.isImageOnScreen(img))
+        return;
 
+      var src = img.dataset.src;
+      var params = this.parseQueryStringToObj(img.dataset["data-url-params-" + this.activeBreakpoint.label]);
+
+      // append params
+      for(var param in params) {
+        src = this.addUpdateQueryStringParameter(src, param, params[param]);
+      }
+
+      // add computed width
+      src = this.addUpdateQueryStringParameter(src, "wid", img.parentElement.clientWidth);
+
+      // finally assign the updated src if it has changed
+      if (img.src !== src) {
+        this.setImageSource(img, src);
+      }
+    },
+    // set the src attribute of the provided image
+    //
+    // @param [node] img - the image to set
+    // @param [string] src - the src to set the image to
+    //
+    setImageSource: function(img, src) {
+      img.src = src;
+    },
     // given a uri add or update an existing querystring with the
     // provided key and value
+    //
     addUpdateQueryStringParameter: function(uri, key, value) {
       var re = new RegExp("([?&])" + key + "=.*?(&|$)", "i");
       var separator = uri.indexOf('?') !== -1 ? "&" : "?";
@@ -138,7 +225,6 @@
         return uri + separator + key + "=" + value;
       }
     },
-
     // convert the parameterized part of a URI into an object
     parseQueryStringToObj: function(uri) {
       var obj = {};
@@ -149,27 +235,10 @@
       );
       return obj;
     },
-
-    // update an images src attribute with base parameters and computed width
-    processImage: function(img) {
-      var src = img.dataset.src;
-      var params = this.parseQueryStringToObj(img.dataset["src-" + (this.activeBreakpoint + 1)]);
-
-      // append params
-      for(var param in params) {
-        src = this.addUpdateQueryStringParameter(src, param, params[param]);
-      }
-
-      // add computer width
-      src = this.addUpdateQueryStringParameter(src, "wid", img.parentElement.clientWidth);
-
-      // finally assign the updated src if it has changed
-      if(img.src !== src) {
-        img.src = src;
-      }
-    },
-
     // detect whether or not a dom element is within the viewport
+    //
+    // @param [node] element - element to test
+    //
     isImageOnScreen: function(element) {
       var elementRect = element.getBoundingClientRect();
       var viewportHeight = document.body.clientHeight;
@@ -179,21 +248,13 @@
       else
         return false;
     },
-
-    onBreakpointChange: function(callback) {
-      // callbreakpoint
-    },
-
-    // listen for scroll events debounced and trigger callback
-    onScrollEvent: function(callback) {
-      window.addEventListener("scroll", this.debounce(function() {
-        callback();
-      }, this.debounceDelay));
-    },
-
     // mutation observer that listens for new nodes of type IMG
     // once detected trigger callback
-    onImageLoaded: function(callback) {
+    //
+    // @param [function] callback - the listener
+    //
+    setupMutationObserver: function(callback) {
+      var self = this;
       var MutationObserver = window.MutationObserver || window.WebKitMutationObserver || window.MozMutationObserver;
 
       var observer = new MutationObserver(function (mutations) {
@@ -201,45 +262,72 @@
           if (mutation.addedNodes) {
             for (var i = 0; i < mutation.addedNodes.length; i++) {
               var node = mutation.addedNodes[i];
-              if (typeof node.getElementsByTagName !== 'function') {
-                return;
+              if (node.nodeType == 1 && node.tagName == "IMG") {
+                callback(node);
               }
-              var imgs = node.getElementsByTagName('img');
-              for (var x = 0; x < imgs.length; x++) {
-                callback(imgs[x]);
+              if (node.nodeType == 1 && node.tagName == "DIV") {
+                var imgs = node.querySelectorAll(self.options.selector);
+                for (var x = 0; x < imgs.length; x++) {
+                  callback(imgs[x]);
+                }
               }
-              // if (node.nodeType == 1 && node.tagName == "IMG") {
-              //   callback(node);
-              // }
             }
           }
         });
       });
 
-      observer.observe(document, {
+      observer.observe(self.options.root, {
         childList: true,
         subtree: true
       });
     },
-
+    // helper for testing whether or not active breakpoint is of a
+    // specified device type
+    //
+    // @param device - the string to test against
+    //
     isDeviceEqualTo: function(device) {
-      return false;
-      // return this.activeBreakpoint.device === device;
+      return this.activeBreakpoint.device === device;
     },
+    // simple publish method used internally to notify subscribers
+    //
+    // @param topic - the topic to publish on
+    //
+    publish: function(topic) {
+      var subs = this.events[topic],
+      len = subs ? subs.length : 0,
+      args = [].slice.call(arguments, 1);
 
-    // Listen for resize events debounced and trigger resize callback
-    onResizeEvent: function(callback) {
-      window.addEventListener("resize", this.debounce(function() {
-        callback();
-      }, this.debounceDelay));
+      //can change loop or reverse array if the order matters
+      while (len--) {
+        subs[len].callback.apply(subs[len].context, args);
+      }
     },
-
+    // simple subscribe method for responsify subscribers
+    // to be notified of internal changes
+    //
+    // @param topic - the topic to subscribe to
+    // @param callback - the callback to execute
+    // @param context - the context in which to execute the callback
+    //
+    on: function(topic, callback, context) {
+      if (!this.events[topic]) {
+        this.events[topic] = [];
+      }
+      this.events[topic].push({
+        callback: callback,
+        context: context || this
+      });
+    },
     // Simple deep extend with array overwrite
+    //
+    // @param [Object] target - the target object to extend
+    // @param [Array] source - an array of object to extend the target with
+    //
     extend: function(target, source) {
       target = target || {};
       for (var prop in source) {
         if (typeof source[prop] === 'object' && Object.prototype.toString.call(source[prop]) !== '[object Array]') {
-          console.log(source[prop]);
           target[prop] = this.extend(target[prop], source[prop]);
         } else {
           target[prop] = source[prop];
@@ -247,7 +335,6 @@
       }
       return target;
     },
-
     // underscore.js debounce method
     debounce: function(func, wait, immediate) {
       var timeout, args, context, timestamp, result;
@@ -282,8 +369,6 @@
       };
     }
   };
-  window.Responsive = {};
-  window.Responsive.Breakpoint = {};
-  window.Responsive.Breakpoint.isDeviceEqualTo = Responsify.isDeviceEqualTo;
+
   return Responsify;
 }));
