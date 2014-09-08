@@ -4,7 +4,7 @@
  *
  * Author: Eric Clifford
  * Email: ericgclifford@gmail.com
- * Date: 06.17.2014
+ * Date: 09.04.2014
  *
  */
 (function(root, factory) {
@@ -25,7 +25,7 @@
 
     // default options
     options: {
-      debug: true,                // enable console output
+      debug: false,                // enable console output
       selector: 'img.responsive', // query selector to find images
       root: document,             // node for mutation observer to listen on
       debounceDelay: 300,         // how often to query events
@@ -34,32 +34,38 @@
           label: 'break-a',
           device: 'mobile',
           enter: 0,
-          exit: 750
+          exit: 479
         },
         {
           label: 'break-b',
           device: 'tablet',
-          enter: 751,
-          exit: 970
+          enter: 480,
+          exit: 767
         },
         {
           label: 'break-c',
           device: 'desktop',
-          enter: 971,
-          exit: 1170
+          enter: 768,
+          exit: 1023
         },
         {
           label: 'break-d',
           device: 'desktop',
-          enter: 1171,
-          exit: 1600
+          enter: 1024,
+          exit: 1279
         },
         {
           label: 'break-e',
           device: 'desktop',
-          enter: 1601,
-          exit: 10000
+          enter: 1280,
+          exit: 1439
         },
+        {
+          label: 'break-f',
+          device: 'desktop',
+          enter: 1440,
+          exit: 100000
+        }
       ],
     },
 
@@ -76,7 +82,7 @@
     //
     init: function(config) {
       // override default options
-      if(config) this.extend(this.options, config);
+      if (config) this.extend(this.options, config);
 
       // get the current breakpoint
       this.activeBreakpoint = this.getClosestBreakpoint(window.innerWidth);
@@ -88,30 +94,10 @@
       this.setupEvents();
 
       // handle auto debugging
-      if(this.options.debug) this.setupDebug();
+      if(this.options.debug) this.setupDebug(this);
 
       // process all images currently in DOM
       this.processImages(this.images);
-    },
-    // find every method on in the library and append some automatic console
-    // output before and after execution
-    //
-    setupDebug: function() {
-      var self = this;
-      var funcs = Object.getOwnPropertyNames(this).forEach(function(property) {
-        if (typeof self[property] != 'function')
-          return;
-
-        var func = self[property];
-        self[property] = function() {
-          console.groupCollapsed("Responsify: %s", property, arguments);
-          console.time('time');
-          var value = func.apply(self, arguments);
-          console.timeEnd('time');
-          console.groupEnd();
-          return value;
-        };
-      });
     },
     // setup DOM and custom events
     //
@@ -119,7 +105,7 @@
       var self = this;
 
       window.addEventListener("resize", this.debounce(function() {
-        self.onResizeEvent();
+        self.onResizeEvent(window.innerWidth);
       }, this.options.debounceDelay));
 
       // window.addEventListener("scroll", this.debounce(function() {
@@ -127,7 +113,7 @@
       // }, this.options.debounceDelay));
 
       // setup watcher to listen for future images inserted into DOM
-      this.setupMutationObserver(function(img) {
+      this.setupMutationObserver(this.options.root, function(img) {
         self.onImageDetected(img);
       });
     },
@@ -150,8 +136,8 @@
     // FIXME: should probably only process images if breakpoint is greater than
     // previous
     //
-    onResizeEvent: function() {
-      var currentBreakpoint = this.getClosestBreakpoint(window.innerWidth);
+    onResizeEvent: function(width) {
+      var currentBreakpoint = this.getClosestBreakpoint(width);
       if (currentBreakpoint != this.activeBreakpoint) {
         this.publish('breakpoint:change', currentBreakpoint);
         this.activeBreakpoint = currentBreakpoint;
@@ -185,11 +171,10 @@
     // @param [node] img - the image to process
     //
     processImage: function(img) {
-      if (!this.isImageOnScreen(img))
-        return;
+      if (!this.isImageOnScreen(img)) return;
 
       var src = img.dataset.src;
-      var params = this.parseQueryStringToObj(img.dataset["data-url-params-" + this.activeBreakpoint.label]);
+      var params = this.parseQueryStringToObj(img.getAttribute("data-url-params-" + this.activeBreakpoint.label));
 
       // append params
       for(var param in params) {
@@ -253,7 +238,7 @@
     //
     // @param [function] callback - the listener
     //
-    setupMutationObserver: function(callback) {
+    setupMutationObserver: function(element, callback) {
       var self = this;
       var MutationObserver = window.MutationObserver || window.WebKitMutationObserver || window.MozMutationObserver;
 
@@ -276,18 +261,10 @@
         });
       });
 
-      observer.observe(self.options.root, {
+      observer.observe(element, {
         childList: true,
         subtree: true
       });
-    },
-    // helper for testing whether or not active breakpoint is of a
-    // specified device type
-    //
-    // @param device - the string to test against
-    //
-    isDeviceEqualTo: function(device) {
-      return this.activeBreakpoint.device === device;
     },
     // simple publish method used internally to notify subscribers
     //
@@ -334,6 +311,34 @@
         }
       }
       return target;
+    },
+    // find every method on in the library and append some automatic console
+    // output before and after execution
+    //
+    // @param [Object] obj - the object to setup logging on
+    setupDebug: function(obj) {
+      var self = this,
+      funcs = Object.getOwnPropertyNames(obj);
+
+      for (var i = 0; i < funcs.length; i++) {
+        // we only want functions
+        if (typeof obj[funcs[i]] != 'function') continue;
+
+        /*jshint -W083 */
+        (function (key) {
+          // store original function
+          var func = obj[funcs[key]];
+          // proxy original request through custom console messaging
+          obj[funcs[key]] = function () {
+            console.groupCollapsed("Responsify: %s", funcs[key], [].slice.call(arguments));
+            console.time('time');
+            var value = func.apply(self, arguments);
+            console.timeEnd('time');
+            console.groupEnd();
+            return value;
+          };
+        }(i));
+      }
     },
     // underscore.js debounce method
     debounce: function(func, wait, immediate) {

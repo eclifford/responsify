@@ -21,13 +21,24 @@ module.exports = function(grunt) {
     },
     karma: {
       options: {
-        frameworks: ['mocha', 'chai', 'sinon-chai', 'jquery-2.1.0'],
+        reporters: ['progress', 'coverage'],
+        frameworks: ['mocha', 'chai', 'jquery-2.1.0', 'sinon-chai'],
 
         files: [
           'responsify.js',
           'bower_components/MutationObserver-shim/MutationObserver.js',
           'test/**/*'
-        ]
+        ],
+
+        preprocessors: {
+          'responsify.js': ['coverage']
+        },
+
+        // optionally, configure the reporter
+        coverageReporter: {
+          type : 'html',
+          dir : 'test/coverage/'
+        }
       },
       unit: {
         browsers: ['PhantomJS']

@@ -1,14 +1,30 @@
 describe("responsify", function() {
 
-  describe("urls", function() {
-    it("should process querystring", function() {
-      var url = "http://www.test.com";
-      url = Responsify.addUpdateQueryStringParameter(url, "foo", "baz");
-      url = Responsify.addUpdateQueryStringParameter(url, "bar", "foo");
-      expect(url).to.equal("http://www.test.com?foo=baz&bar=foo");
+  describe("addUpdateQueryStringParmeter()", function() {
+    var url = "";
+    beforeEach(function() {
+      url = "http://www.test.com";
     });
 
-    it("extractQueryStringParams()", function() {
+    it("should add new parameters to the URI", function() {
+      url = Responsify.addUpdateQueryStringParameter(url, "foo", "baz");
+      expect(url).to.equal("http://www.test.com?foo=baz");
+    });
+
+    it("should update update parameters already in the URI", function() {
+      url = Responsify.addUpdateQueryStringParameter(url, "foo", "bar");
+      expect(url).to.equal("http://www.test.com?foo=bar");
+    });
+
+    it("should be able to append multiple params correctly", function() {
+      url = Responsify.addUpdateQueryStringParameter(url, "foo", "bar");
+      url = Responsify.addUpdateQueryStringParameter(url, "baz", "qux");
+      expect(url).to.equal("http://www.test.com?foo=bar&baz=qux");
+    });
+  });
+
+  describe("parseQueryStringToObj()", function() {
+    it("should be able to extract full query string into object", function() {
       var params = "?wid=100&foo=bar&baz=foo";
       var paramObj = Responsify.parseQueryStringToObj(params);
       expect(paramObj).to.deep.equal({
@@ -16,67 +32,106 @@ describe("responsify", function() {
         "foo": "bar",
         "baz": "foo"
       });
+    });
 
-      paramObj = Responsify.parseQueryStringToObj("foo=baz&baz=foo");
+    it("should be able to extract partial query string into object", function() {
+      var params = "wid=100&foo=bar";
+      var paramObj = Responsify.parseQueryStringToObj(params);
       expect(paramObj).to.deep.equal({
-        "foo": "baz",
-        "baz": "foo"
-      });
-
-      paramObj = Responsify.parseQueryStringToObj("foo=baz");
-      expect(paramObj).to.deep.equal({
-        "foo": "baz"
+        "wid": "100",
+        "foo": "bar"
       });
     });
   });
 
+  describe("getClosestBreakpoint()", function() {
+    it("should be able to determine appropriate breakpoint based on provided width", function() {
+      var breakpoint = Responsify.getClosestBreakpoint(0);
+      expect(breakpoint.label).to.equal('break-a');
 
-  describe("helpers", function() {
-    it("getClosestBreakpoint()", function() {
-      var A = Responsify.getClosestBreakpoint(0);
-      expect(A.label).to.equal('break-a');
+      breakpoint = Responsify.getClosestBreakpoint(751);
+      expect(breakpoint.label).to.equal('break-b');
 
-      var B = Responsify.getClosestBreakpoint(751);
-      expect(B.label).to.equal('break-b');
+      breakpoint = Responsify.getClosestBreakpoint(1170);
+      expect(breakpoint.label).to.equal('break-d');
     });
   });
 
-  describe("images", function() {
-    before(function(done) {
-      $('body').load('base/test/fixtures/images.html', function() {
-        done();
+  describe("onResizeEvent()", function() {
+    beforeEach(function() {
+      // set breakpoint to A
+      Responsify.activeBreakpoint = Responsify.options.breakpoints[0];
+    });
+
+    it("should emit a breakpoint:change event upon breakpoint change", function() {
+      var spy = sinon.spy();
+      Responsify.on('breakpoint:change', spy);
+      Responsify.onResizeEvent(751);
+      expect(spy).to.have.been.called;
+    });
+
+    it("should not emit an event if breakpoint does not change", function() {
+      var spy = sinon.spy();
+      Responsify.on('breakpoint:change', spy);
+      Responsify.onResizeEvent(0);
+      expect(spy).not.to.have.been.called;
+    });
+  });
+
+  describe("extend()", function() {
+    it("should be able to extend target object with source object", function() {
+      var obj = Responsify.extend({ foo: 'baz'}, { bar: 'quz'});
+      expect(obj).to.deep.equal({
+        foo: 'baz',
+        bar: 'quz'
       });
-
-      Responsify.activeBreakpoint = {
-        label: 'break-a',
-        enter: 0,
-        exit: 751
-      };
     });
 
-    it("processImage()", function() {
-      var imgA = $('#a')[0];
-      Responsify.processImage(imgA);
-      expect(imgA.src).to.equal('http://s7d9.scene7.com/is/image/DEMOAKQA/1440.1?resMode=sharp2&qlt=85&wid=384');
+    it("it should deep extend", function() {
+      var obj = Responsify.extend({ foo: { baz: 'bar' }}, { foo: { baz: 'far', quz: 'foo'}});
+      expect(obj).to.deep.equal({
+        foo: {
+          baz: 'far',
+          quz: 'foo'
+        }
+      });
+    });
+  });
 
-      var imgB = $('#b')[0];
-      Responsify.processImage(imgB);
-      expect(imgB.src).to.equal('http://s7d9.scene7.com/is/image/DEMOAKQA/1440.2?resMode=sharp2&qlt=85&wid=384');
+  describe("onImageDetected()", function() {
+    before(function() {
+      Responsify.images = [];
     });
 
-    // it("isImageOnScreen()", function() {
-    //   var imgA = $('#a')[0];
-    //   var onScreen = Responsify.isImageOnScreen(imgA);
-    //   expect(onScreen).to.equal(false);
-    //
-    //   var imgB = $('#b')[0];
-    //   onScreen = Responsify.isImageOnScreen(imgB);
-    //   expect(onScreen).to.equal(false);
-    //
-    //   var imgC = $('#c')[0];
-    //   onScreen = Responsify.isImageOnScreen(imgC);
-    //   expect(onScreen).to.equal(false);
-    // });
+    it("should process image and store", function() {
+      var spy = sinon.spy();
+      var stub = sinon.stub(Responsify, "processImage", spy);
+      var img = new Image(1,1);
+      Responsify.onImageDetected(img);
+      expect(spy).to.have.been.called;
+      expect(Responsify.images.length).to.equal(1);
+    });
+  });
+
+  describe("setupMutationObserver()", function() {
+    before(function() {
+      var spy = sinon.spy();
+      Responsify.setupMutationObserver(document, spy);
+    });
+
+    it("should detect a change to the dom", function() {
+
+    });
+  });
+
+  describe("publish()", function() {
+  });
+
+  describe("isImageOnScreen()", function() {
+  });
+
+  describe("isDeviceEqualTo()", function() {
+
   });
 
 });
