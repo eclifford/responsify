@@ -25,10 +25,11 @@
 
     // default options
     options: {
-      debug: false,                // enable console output
+      debug: false,               // enable console output
       selector: 'img.responsive', // query selector to find images
-      root: document,             // node for mutation observer to listen on
+      root: document.body,        // node for mutation observer to listen on
       debounceDelay: 300,         // how often to query events
+      testVisiblity: true,        // whether or not to test for image visiblity
       breakpoints: [
         {
           label: 'break-a',
@@ -108,9 +109,11 @@
         self.onResizeEvent(window.innerWidth);
       }, this.options.debounceDelay));
 
-      // window.addEventListener("scroll", this.debounce(function() {
-      //   self.onScrollEvent();
-      // }, this.options.debounceDelay));
+      if (this.options.testVisiblity) {
+        window.addEventListener("scroll", this.debounce(function() {
+          self.onScrollEvent();
+        }, this.options.debounceDelay));
+      }
 
       // setup watcher to listen for future images inserted into DOM
       this.setupMutationObserver(this.options.root, function(img) {
@@ -171,9 +174,9 @@
     // @param [node] img - the image to process
     //
     processImage: function(img) {
-      if (!this.isImageOnScreen(img)) return;
+      if (this.options.testVisiblity && !this.isImageOnScreen(img)) return;
 
-      var src = img.dataset.src;
+      var src = img.getAttribute('data-src');
       var params = this.parseQueryStringToObj(img.getAttribute("data-url-params-" + this.activeBreakpoint.label));
 
       // append params
