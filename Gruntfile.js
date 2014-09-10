@@ -27,7 +27,8 @@ module.exports = function(grunt) {
         files: [
           'responsify.js',
           'bower_components/MutationObserver-shim/MutationObserver.js',
-          'test/**/*'
+          'test/unit/**/*.js',
+          'test/fixtures/**/*.html'
         ],
 
         preprocessors: {

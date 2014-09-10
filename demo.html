@@ -1,7 +1,7 @@
 <html>
   <head>
     <title>Responsify Demo</title>
-    <script src='responsify.js'></script>
+    <script src='responsify.js' defer></script>
     <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.css" media="screen" title="no title" charset="utf-8">
     <style>
       .responsive {
@@ -9,62 +9,49 @@
       }
     </style>
     <script>
-      window.onload = function () {
+      document.addEventListener("DOMContentLoaded", function() {
         Responsify.init({
           debug: true
         });
-      };
+      });
     </script>
   </head>
   <body>
     <input type='button' id='btn-add' value="add image"></input>
-    <div class='container-fluid' id='container'>
+    <div class='container' id='container'>
       <div class="row">
-        <!-- <div class="col-md-12">
-          <img data-src="http://s7d9.scene7.com/is/image/audigreen/?layer=0&amp;src=audigreen/n1bgb-all--2014-us&amp;layer=1&amp;src=audigreen/n1gsb-all-8v-2015&amp;layer=2&amp;src=audigreen/n1bwb-all-8v-2014--kark8s&amp;layer=3&amp;src=audigreen/n1bab-all-8v-2015--14_a2a2-kark8s&amp;layer=4&amp;src=audigreen/n1svb-all-8v-2015--14_a2a2-kark8s-stf2jb&amp;layer=5&amp;src=audigreen/n1rab-all-8v-2015--kark8s-radc0x-stf2jb&amp;layer=6&amp;src=audigreen/n1neb-all-8v-2015--kark8s-nes8wa-stf2jb&amp;layer=7&amp;src=audigreen/n1enb-all-8v-2014-us-stf2jb-gra8t2&amp;layer=8&amp;src=audigreen/n1zib-all-8v-2015--kark8s-zie4ze&amp;layer=9&amp;src=audigreen/n1sbb-all-8v-2015--sbr8sk-kark8s&amp;layer=10&amp;src=audigreen/n1swb-all-8v-2015-us-hsw8ig&amp;layer=11&amp;src=audigreen/n1fws-all-8v-2015--kark8s&amp;blendmode=screen&amp;defaultImage=audigreen/error_image&amp;layer=comp&amp;cropN=0.02,0.05,1,1"
-          class="responsive media-item" alt="" style="width: 100%;">
-        </div> -->
-        <div class="col-md-12">
-          <img class="responsive panoramic" alt="" data-src="http://s7d9.scene7.com/is/image/Audiusastaging/2015-Audi-Q3--pano-01?resMode=sharp2&amp;qlt=85&amp;fit=crop"
-          data-url-params-break-a="hei=200&amp;qlt=65"
-          data-url-params-break-b="hei=320&amp;qlt=65"
-          data-url-params-break-c="hei=360"
-          data-url-params-break-d="hei=480"
-          data-url-params-break-e="hei=480"
-          data-url-params-break-f="hei=480" style="width: 100%;">
-        </div>
         <div class="col-md-12">
           <img class='responsive'
-            data-src="http://s7d9.scene7.com/is/image/DEMOAKQA/1440.1?resMode=sharp2&qlt=85"
+            data-responsify="http://s7d9.scene7.com/is/image/DEMOAKQA/"
+            data-responsify-break-a="1440.1?resMode=sharp"
+            data-responsify-break-b="1440.2?resMode=sharp"
+            data-responsify-break-c="1440.3?resMode=sharp"
+            data-responsify-break-d="1440.4?resMode=sharp"
           />
         </div>
       </div>
-      <!-- <div class="row">
-        <div class="col-md-4"><img class='responsive' src='http://s7d9.scene7.com/is/image/DEMOAKQA/1440.2'
-          data-src="http://s7d9.scene7.com/is/image/DEMOAKQA/1440.2?resMode=sharp2&qlt=85"></div>
-        <div class="col-md-4"><img class='responsive' src='http://s7d9.scene7.com/is/image/DEMOAKQA/1440.3'
-          data-src="http://s7d9.scene7.com/is/image/DEMOAKQA/1440.3?resMode=sharp2&qlt=85"></div>
-        <div class="col-md-4"><img class='responsive' src='http://s7d9.scene7.com/is/image/DEMOAKQA/1440.4'
-          data-src="http://s7d9.scene7.com/is/image/DEMOAKQA/1440.4?resMode=sharp2&qlt=85"></div>
+      <div class="row">
+       <div class="col-md-12">
+         <img class='responsive'
+           data-responsify="http://s7d9.scene7.com/is/image/DEMOAKQA/1440.2"
+           data-responsify-break-a="qlt=50"
+           data-responsify-break-b="?qlt=60"
+           data-responsify-break-c="qlt=70"
+           data-responsify-break-d="?qlt=80"
+         />
+       </div>
       </div>
       <div class="row">
-        <div class="col-md-6"><img class='responsive' src='http://s7d9.scene7.com/is/image/DEMOAKQA/1440.5'
-          data-src="http://s7d9.scene7.com/is/image/DEMOAKQA/1440.5?resMode=sharp2&qlt=85"></div>
-        <div class="col-md-6"><img class='responsive' src='http://s7d9.scene7.com/is/image/DEMOAKQA/1440.6'
-          data-src="http://s7d9.scene7.com/is/image/DEMOAKQA/1440.6?resMode=sharp2&qlt=85"></div>
+       <div class="col-md-12">
+         <img class='responsive'
+           data-responsify="http://s7d9.scene7.com/is/image/DEMOAKQA/1440.3"
+           data-responsify-break-a="qlt=50"
+           data-responsify-break-b="qlt=60"
+           data-responsify-break-c="qlt=70"
+           data-responsify-break-d="qlt=80"
+         />
+       </div>
       </div>
-      <div class="row">
-        <div class="col-md-12"><img class='responsive' src='http://s7d9.scene7.com/is/image/DEMOAKQA/1440.7'
-          data-src="http://s7d9.scene7.com/is/image/DEMOAKQA/1440.7?resMode=sharp2&qlt=85"></div>
-      </div>
-      <div class="row">
-        <div class="col-md-4"><img class='responsive' src='http://s7d9.scene7.com/is/image/DEMOAKQA/1440.8'
-          data-src="http://s7d9.scene7.com/is/image/DEMOAKQA/1440.8?resMode=sharp2&qlt=85"></div>
-        <div class="col-md-4"><img class='responsive' src='http://s7d9.scene7.com/is/image/DEMOAKQA/1440.9'
-          data-src="http://s7d9.scene7.com/is/image/DEMOAKQA/1440.9?resMode=sharp2&qlt=85"></div>
-        <div class="col-md-4"><img class='responsive' src='http://s7d9.scene7.com/is/image/DEMOAKQA/1440.10'
-          data-src="http://s7d9.scene7.com/is/image/DEMOAKQA/1440.10?resMode=sharp2&qlt=85"></div>
-      </div>-->
     </div>
     <script>
       var index = 1;
@@ -73,11 +60,9 @@
          var container = document.getElementById('container');
          var img = document.createElement('img');
          img.className = 'responsive';
-         img.dataset.src = 'http://s7d9.scene7.com/is/image/DEMOAKQA/1440.' + index + '?resMode=sharp2&qlt=85';
-         img.src = 'http://s7d9.scene7.com/is/image/DEMOAKQA/1440.' + index;
+         img.setAttribute('data-responsify', 'http://s7d9.scene7.com/is/image/DEMOAKQA/1440.' + index + '?resMode=sharp2&qlt=85');
          container.insertBefore(img, container.firstChild);
        };
-
     </script>
   </body>
 </html>

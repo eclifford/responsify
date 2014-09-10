@@ -1,15 +1,19 @@
 # Responsify  [![Build Status](https://travis-ci.org/eclifford/responsify.svg?branch=master)](https://travis-ci.org/eclifford/responsify) [![Coverage Status](https://coveralls.io/repos/eclifford/responsify/badge.png?branch=master)](https://coveralls.io/r/eclifford/responsify?branch=master)
 
-> Responsify.js is a src-N based responsive image solution intended to be used
-with parameter based responsive image services such as Adobe Scene7.
+> Responsify.js is a src-N based responsive image solution optimized for parameterized
+dynamic media solutions such as Adobe Scene7
 
 ## Features
+
+- Close integration with Adobe Scene7 including custom parameterization per breakpoint
 - Automatic detection of new responsive images added to DOM w/ MutationObservers perfect for
-  RequireJS or AJAX rendered partials
-- Automatic detection and processing of visible images.
+  RequireJS or AJAX rendered partial
 - Support for IE8/9 (w/Polyfill), FireFox, Chrome, Opera
-- Loads in low resolution images for non javascript support and to avoid FOUC
-- Customisable breakpoints
+- Customizable breakpoints (including events of breakpoint changes)
+
+## Why?
+
+## How Responsify works
 
 ## Quick Start
 
@@ -21,40 +25,43 @@ bower install responsify
 
 ### Add Responsify to DOCUMENT
 
-Responsify can be loaded in either the header or at the end of the body.
+Responsify can be loaded in either the head or at the end of the body. Optionally
+use `defer` to have responsify executed after DOM creation.
 
 ```html
 <head>
-  <script src='bower_components/resonsify/responsify.js'></script>
+  <script src='bower_components/resonsify/responsify.js' defer></script>
 </head>
 ```
 
 ### Add Image with appropriate attributes to DOM
 
-A valid Responsify responsive image has 3 basic attributes at minium
+A valid Responsify responsive image has 3 basic attributes at minimum.
 
 1. Semantic **IMG** tag
-2. CSS class **responsive**
-3. has `data-src` populated with base asset URI before calculated width
+2. By default a class of `responsive` (configurable)
+3. has `data-responsify` populated with base asset URI before calculated width
 4. Optionally may include default `src` attribute for quick loading low resolution images
 
 ```html
 <img class='responsive'
-  src='http://s7d9.scene7.com/is/image/DEMOAKQA/1440.1'
-  data-src="http://s7d9.scene7.com/is/image/DEMOAKQA/1440.1?resMode=sharp2&qlt=85"
+  src="http://s7d9.scene7.com/is/image/DEMOAKQA/1440.1"
+  data-responsify="http://s7d9.scene7.com/is/image/DEMOAKQA/1440.1"
 />
 ```
+
+###
 
 ### Initialise Responsify
 
 Responsify needs to be told when to initialize. It is important that this is done after the DOM has been rendered. In the below
-example this is done on the `window.onload` event, but optionally this may be done in **jQuerys** `onReady` event.
+example this is done on the `DOMContentLoaded` event, but optionally this may be done in **jQuerys** `onReady` event.
 
 ```html
 <script>
-  window.onload = function() {
+  document.addEventListener("DOMContentLoaded", function() {
     Responsify.init();
-  }
+  });
 </script>
 ```
 
