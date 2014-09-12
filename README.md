@@ -1,7 +1,7 @@
 # Responsify  [![Build Status](https://travis-ci.org/eclifford/responsify.svg?branch=master)](https://travis-ci.org/eclifford/responsify) [![Coverage Status](https://img.shields.io/coveralls/eclifford/responsify.svg)](https://coveralls.io/r/eclifford/responsify?branch=master)
 
-> Responsify.js is a src-N based responsive image solution optimized for parameterized
-dynamic media solutions such as Adobe Scene7.
+> Responsify.js is a src-N based responsive image solution optimized for
+dynamic image solutions such as Adobe Scene7.
 
 ## Features
 
@@ -53,7 +53,7 @@ A valid Responsify responsive image has 3 basic attributes at minimum.
 
 ###
 
-### Initialise Responsify
+### Initialize Responsify
 
 Responsify needs to be told when to initialize. It is important that this is done after the DOM has been rendered. In the below
 example this is done on the `DOMContentLoaded` event, but optionally this may be done in **jQuerys** `onReady` event.

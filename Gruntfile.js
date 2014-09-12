@@ -64,7 +64,14 @@ module.exports = function(grunt) {
       }
     },
     bump: {
-      files: ['package.json', 'bower.json']
+      options: {
+        files: ['package.json', 'bower.json'],
+        updateConfigs: ['pkg'],
+        commit: false,
+        createTag: false,
+        push: false,
+        commitFiles: ['-a']
+      }
     }
   });
 

@@ -2,7 +2,7 @@
   "name": "responsify",
   "main": "responsify.js",
   "description": "",
-  "version": "0.0.2",
+  "version": "0.0.4",
   "homepage": "https://github.com/eclifford/responsify",
   "authors": [
     "eclifford <ericgclifford@gmail.com>"
