@@ -21,7 +21,6 @@ module.exports = function(grunt) {
     },
     karma: {
       options: {
-        reporters: ['progress', 'coverage'],
         frameworks: ['mocha', 'chai', 'jquery-2.1.0', 'sinon-chai'],
 
         files: [
@@ -33,19 +32,24 @@ module.exports = function(grunt) {
 
         preprocessors: {
           'responsify.js': ['coverage']
-        },
+        }
 
-        // optionally, configure the reporter
+      },
+      unit: {
+        reporters: ['progress', 'coverage'],
+        browsers: ['PhantomJS'],
         coverageReporter: {
           type : 'html',
           dir : 'test/coverage/'
         }
       },
-      unit: {
-        browsers: ['PhantomJS']
-      },
-      single: {
+      ci: {
+        reporters: ['progress', 'coverage', 'coveralls'],
         browsers: ['PhantomJS'],
+        coverageReporter: {
+          type : 'lcov',
+          dir : 'test/coverage/'
+        },
         singleRun: true
       }
     },
