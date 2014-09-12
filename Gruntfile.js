@@ -25,8 +25,8 @@ module.exports = function(grunt) {
         frameworks: ['mocha', 'chai', 'jquery-2.1.0', 'sinon-chai'],
 
         files: [
-          'responsify.js',
           'bower_components/MutationObserver-shim/MutationObserver.js',
+          'responsify.js',
           'test/unit/**/*.js',
           'test/fixtures/**/*.html'
         ],

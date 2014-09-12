@@ -15,10 +15,12 @@ describe("responsify", function() {
       mock.expects("calculateBreakpoint").once();
       mock.expects("setupEvents").once();
       mock.expects("processImages").once();
+      mock.expects("setupDebug").never();
 
       Responsify.init({
         selector: 'img.res',
-        debounchDelay: 200
+        debounchDelay: 200,
+        debug: false
       });
 
       mock.verify();
@@ -26,41 +28,46 @@ describe("responsify", function() {
   });
 
   describe("setupEvents()", function() {
-    var mock;
+    var clock;
+    var stub;
     before(function() {
-      mock = sinon.mock(Responsify);
+      Responsify.setupEvents();
+      clock = sinon.useFakeTimers();
     });
     after(function() {
-      mock.restore();
+      clock.restore();
     });
-    it("should setup the appropriate events", function() {
-      mock.expects("addMutationObserver").once();
-      Responsify.setupEvents();
+    it("should listen for resize event and trigger onResizeEvent", function() {
+      var stub = sinon.stub(Responsify, "onResizeEvent");
+      // HACK: polyfill for phantomJS https://github.com/ariya/phantomjs/issues/11289
+      var evt = document.createEvent('CustomEvent');
+      evt.initCustomEvent('resize', false, false, null);
+      window.dispatchEvent(evt);
+      clock.tick(100);
+      expect(stub).to.have.been.called;
+      stub.restore();
     });
   });
 
   describe("onScrollEvent()", function() {
     it("should call process images", function() {
-      var spy = sinon.spy();
-      var stub = sinon.stub(Responsify, "processImages", spy);
+      var stub = sinon.stub(Responsify, "processImages");
       Responsify.onScrollEvent();
-      expect(spy).to.have.been.called;
+      expect(stub).to.have.been.called;
       stub.restore();
     });
   });
 
   describe("processImages", function() {
     it("should call processImage on all images", function() {
-      var spy = sinon.spy();
-      var stub = sinon.stub(Responsify, "processImage", spy);
+      var stub = sinon.stub(Responsify, "processImage");
       Responsify.processImages([{}, {}, {}]);
-      expect(spy).to.have.been.calledThrice;
-
+      expect(stub).to.have.been.calledThrice;
       stub.restore();
     });
   });
 
-  describe("processImage", function() {
+  describe("processImage()", function() {
     before(function(done) {
       $('#fixture').load('base/test/fixtures/images.html', function() {
         done();
@@ -72,6 +79,67 @@ describe("responsify", function() {
       Responsify.processImage(img);
     });
     after(function() {
+      $('#fixture').empty();
+    });
+  });
+
+  describe("addMutationObserver()", function() {
+    var clock;
+    before(function() {
+      clock = sinon.useFakeTimers();
+    });
+    after(function() {
+      clock.restore();
+    });
+    it("should listen for changed image elements on specified DOM node", function() {
+      var spy = sinon.spy();
+      Responsify.addMutationObserver($('#fixture')[0], spy);
+      var $img = $("<img class='responsive'>");
+      $('#fixture').append($img);
+      clock.tick(30);
+      expect(spy).to.have.been.calledWith($img[0]);
+    });
+    it("should listen for changed image elements deeply nested on a specified DOM node", function() {
+      var spy = sinon.spy();
+      Responsify.addMutationObserver($('#fixture')[0], spy);
+      var $div = $("<div>");
+      var $img = $("<img class='responsive'>");
+      $div.append($img);
+      $('#fixture').append($div);
+      clock.tick(30);
+      expect(spy).to.have.been.calledWith($img[0]);
+    });
+    after(function() {
+      $('#fixture').empty();
+    });
+  });
+
+  describe("buildImageUrl()", function() {
+    it("should properly combine two paths", function() {
+      var url = Responsify.buildImageURI("http://www.test.com/", "foo.jpg");
+      expect(url).to.equal("http://www.test.com/foo.jpg");
+    });
+    it("should properly combine a path with a queryString", function() {
+      var url = Responsify.buildImageURI("http://www.test.com/foo", "?wid=700&hei=400");
+      expect(url).to.equal("http://www.test.com/foo?wid=700&hei=400");
+    });
+    it("should properly combine a path + queryStrig with another queryString", function() {
+      var url = Responsify.buildImageURI("http://www.test.com/foo?wid=700", "hei=400");
+      expect(url).to.equal("http://www.test.com/foo?wid=700&hei=400");
+
+      url = Responsify.buildImageURI("http://www.test.com/foo?wid=700", "&hei=400");
+      expect(url).to.equal("http://www.test.com/foo?wid=700&hei=400");
+
+      url = Responsify.buildImageURI("http://www.test.com/foo?wid=700", "?hei=400");
+      expect(url).to.equal("http://www.test.com/foo?wid=700&hei=400");
+    });
+    it("should work without a base URL", function() {
+      var url = Responsify.buildImageURI("", "http://www.test.com/foo.jpg");
+      expect(url).to.equal("http://www.test.com/foo.jpg");
+    });
+    it("should work without a breakpoint URL", function() {
+      var url = Responsify.buildImageURI("http://www.test.com/foo.jpg", "");
+      expect(url).to.equal("http://www.test.com/foo.jpg");
     });
   });
 
@@ -109,6 +177,7 @@ describe("responsify", function() {
     });
   });
 
+
   describe("extend()", function() {
     it("should be able to extend target object with source object", function() {
       var obj = Responsify.extend({ foo: 'baz'}, { bar: 'quz'});
@@ -144,29 +213,18 @@ describe("responsify", function() {
     });
   });
 
-  // describe("setupMutationObserver()", function() {
-  //   var spy;
-  //   before(function() {
-  //     spy = sinon.spy();
-  //     Responsify.setupMutationObserver(document.body, spy);
-  //   });
-  //
-  //   it("should detect a change to the dom", function() {
-  //     var img = document.createElement("img");
-  //     img.className = 'responsive';
-  //     document.body.appendChild(img);
-  //     expect(spy).to.have.been.called;
-  //   });
-  // });
+  describe("setupDebug()", function() {
+    var foo = {
+      baz: function() {},
+      bar: function() {}
+    };
 
-  describe("publish()", function() {
-  });
-
-  describe("isImageOnScreen()", function() {
-  });
-
-  describe("isDeviceEqualTo()", function() {
-
+    it("should wrap function object", function() {
+      var spy = sinon.spy(foo, "baz");
+      Responsify.setupDebug(foo);
+      foo.baz();
+      expect(spy).to.have.been.called;
+    });
   });
 
 });

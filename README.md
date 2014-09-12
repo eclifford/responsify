@@ -1,15 +1,16 @@
 # Responsify  [![Build Status](https://travis-ci.org/eclifford/responsify.svg?branch=master)](https://travis-ci.org/eclifford/responsify) [![Coverage Status](https://coveralls.io/repos/eclifford/responsify/badge.png?branch=master)](https://coveralls.io/r/eclifford/responsify?branch=master)
 
 > Responsify.js is a src-N based responsive image solution optimized for parameterized
-dynamic media solutions such as Adobe Scene7
+dynamic media solutions such as Adobe Scene7.
 
 ## Features
 
 - Close integration with Adobe Scene7 including custom parameterization per breakpoint
 - Automatic detection of new responsive images added to DOM w/ MutationObservers perfect for
-  RequireJS or AJAX rendered partial
+content loaded after page load.
 - Support for IE8/9 (w/Polyfill), FireFox, Chrome, Opera
 - Customizable breakpoints (including events of breakpoint changes)
+- No third party libaries (lean)
 
 ## Why?
 

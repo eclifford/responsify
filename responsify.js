@@ -29,8 +29,7 @@
       namespace: 'responsify',
       selector: 'img.responsive', // query selector to find images
       root: document,             // node for mutation observer to listen on
-      debounceDelay: 250,         // how often to query events
-      dynamicHeight: true,
+      dynamicWidth: true,
       breakpoints: [
         {
           label: 'break-a',
@@ -93,19 +92,14 @@
     //
     setupEvents: function() {
       var self = this;
-
-      window.addEventListener("resize", this.debounce(function() {
-        self.onResizeEvent(window.innerWidth);
-      }, this.options.debounceDelay));
-
-      window.addEventListener("scroll", this.debounce(function() {
-        self.onScrollEvent();
-      }, this.options.debounceDelay));
+      window.addEventListener("resize", function() {
+        window.requestAnimationFrame(function() {
+          self.onResizeEvent(window.innerWidth);
+        });
+      });
 
       // setup watcher to listen for future images inserted into DOM
-      this.addMutationObserver(this.options.root, function(img) {
-        self.onImageDetected(img);
-      });
+      this.addMutationObserver(this.options.root, this.onImageDetected);
     },
     // once image is detected by mutation observor we process it
     //
@@ -133,6 +127,8 @@
         this.onBreakpointChange();
       }
     },
+    // notify breakpoint subscribers of a change
+    //
     onBreakpointChange: function() {
       this.publish('responsify:breakpoint:change', this.activeBreakpoint);
     },
@@ -168,7 +164,7 @@
       // build the image url
       var imageURI = this.buildImageURI(baseURI, breakpointURI);
 
-      if (this.options.dynamicHeight) {
+      if (this.options.dynamicWidth) {
         // append dynamic width
         imageURI = this.appendQueryString(imageURI, "wid=" + img.parentElement.clientWidth);
       }
@@ -207,10 +203,15 @@
     setImageSource: function(img, src) {
       img.src = src;
     },
-    // append a query string on to an existing uri
+    // append a query string on to an existing uri cleaning
+    // up seperating characters if necessary
+    //
+    // @param [string] uri - the base URI
+    // @param [string] query - the query to append to URI
     //
     appendQueryString: function(uri, query) {
       if (!query) return uri;
+      query = query.replace(/^(&|\?)/, '');
       var separator = uri.indexOf('?') !== -1 ? '&' : '?';
       return uri + separator + query;
     },
@@ -229,12 +230,12 @@
             for (var i = 0; i < mutation.addedNodes.length; i++) {
               var node = mutation.addedNodes[i];
               if (node.nodeType == 1 && node.tagName == "IMG") {
-                callback(node);
+                callback.call(self, node);
               }
               if (node.nodeType == 1 && node.tagName == "DIV") {
                 var imgs = node.querySelectorAll(self.options.selector);
                 for (var x = 0; x < imgs.length; x++) {
-                  callback(imgs[x]);
+                  callback.call(self, imgs[x]);
                 }
               }
             }
@@ -320,41 +321,11 @@
           };
         }(i));
       }
-    },
-    // underscore.js debounce method
-    debounce: function(func, wait, immediate) {
-      var timeout, args, context, timestamp, result;
-
-      var later = function() {
-        var last = Date.now - timestamp;
-        if (last < wait) {
-          timeout = setTimeout(later, wait - last);
-        } else {
-          timeout = null;
-          if (!immediate) {
-            result = func.apply(context, args);
-            context = args = null;
-          }
-        }
-      };
-
-      return function() {
-        context = this;
-        args = arguments;
-        timestamp = Date.now;
-        var callNow = immediate && !timeout;
-        if (!timeout) {
-          timeout = setTimeout(later, wait);
-        }
-        if (callNow) {
-          result = func.apply(context, args);
-          context = args = null;
-        }
-
-        return result;
-      };
     }
   };
+
+  // polyfills
+  window.requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame || function (callback) { window.setTimeout(callback, 1000 / 60); };
 
   return Responsify;
 }));
