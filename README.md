@@ -5,16 +5,24 @@ dynamic image solutions such as Adobe Scene7.
 
 ## Features
 
-- Close integration with Adobe Scene7 including custom parameterization per breakpoint
-- Automatic detection of new responsive images added to DOM w/ MutationObservers perfect for
-content loaded after page load.
-- Support for IE8/9 (w/Polyfill), FireFox, Chrome, Opera
-- Customizable breakpoints (including events of breakpoint changes)
-- No third party libaries (lean)
+- Support for parameterized media image services such as Adobe Scene7
+- Support for declarative images per breakpoint if you want to serve your own responsive images
+- Built in customizable breakpoint detection/notification for use in responsive grids such as
+those found in Bootstrap and Foundation
+- Automatic detection and processing of all responsive images added post page load. Perfect for SPA's and sites with
+a lot of dynamic content.
+- No third party libraries required
+- Non blocking script
 
-## Why?
+## Why Responsify?
 
-## How Responsify works
+Responsify was born out of the need for a **Scene7** based responsive solution for a large enterprise content managed web
+application. We needed something that was **fast**, **non blocking**, **standalone**, **convention over declaration**
+and capable of **automatically** handling images loaded post page load through **RequireJS**.
+
+In the end we created a solution that should work not only for **Scene7** but for any **src-N** based
+responsive image solution. The future may be **PictureFill** and **srcset** but the verbose non dynamic
+markup is a non starter for us.
 
 ## Quick Start
 
@@ -35,28 +43,13 @@ use `defer` to have responsify executed after DOM creation.
 </head>
 ```
 
-### Add Image with appropriate attributes to DOM
-
-A valid Responsify responsive image has 3 basic attributes at minimum.
-
-1. Semantic **IMG** tag
-2. By default a class of `responsive` (configurable)
-3. has `data-responsify` populated with base asset URI before calculated width
-4. Optionally may include default `src` attribute for quick loading low resolution images
-
-```html
-<img class='responsive'
-  src="http://s7d9.scene7.com/is/image/DEMOAKQA/1440.1"
-  data-responsify="http://s7d9.scene7.com/is/image/DEMOAKQA/1440.1"
-/>
-```
-
-###
-
 ### Initialize Responsify
 
 Responsify needs to be told when to initialize. It is important that this is done after the DOM has been rendered. In the below
 example this is done on the `DOMContentLoaded` event, but optionally this may be done in **jQuerys** `onReady` event.
+
+
+Vanilla Face
 
 ```html
 <script>
@@ -66,106 +59,117 @@ example this is done on the `DOMContentLoaded` event, but optionally this may be
 </script>
 ```
 
-## Scene7 Basics
+jQuery
 
-[Scene7](http://www.adobe.com/solutions/web-experience-management/scene7-new.html) is a asset media service provided by Adobe for the Adobe Experience Manager
-CMS. With [Scene7](http://www.adobe.com/solutions/web-experience-management/scene7-new.html) we are able to generate and display images for multiple sizes, formats, crops
-and or effects. The list below shows a small subset of the available options that Scene7 provides for us.  
-
-#### Example Scene7 Parameters
-
-| Parameter     | Description    |
-| ------------- |----------------|
-| wid           | width          |
-| hei           | height         |
-| qlt           | quality        |
-| pos           | layer position |
-| rect          | view rectangle |
-
-[Scene7 Reference Documentation](http://crc.scene7.com/is-docs/pages/HTTP-Protocol-Reference.htm#_res_Resolution-Based_Image)
-
-We generate a Scene7 URL by combining the base asset URL with any number of parameters.
-
-**Example Base URL**
-
-**http://s7d9.scene7.com/is/image/DEMOAKQA/1440.1**
-
-**Example URL with defined width**
-
-**http://s7d9.scene7.com/is/image/DEMOAKQA/1440.1?wid=1024**
-
-**Example URI with defined width and quality**
-
-**http://s7d9.scene7.com/is/image/DEMOAKQA/1440.1?wid=1024&=qlt=80**
-
-## Configuration Options
-
-### `breakpoints`
-
-Set custom breakpoints by passing them to `init`
-
-```js
-window.onload = function() {
-  Responsify.init({
-    breakpoints: ['750', '970', '1170', '1600']
+```html
+<script>
+  $(document).ready(function() {
+    Responsify.init();
   });
-}
+</script>
 ```
 
-### `debounceDelay`
+### Basic Scene7 Responsive image
 
-The delay in milliseconds between trigging of internal events `onScroll` and `onResize`. Lower for hider fidelity and increase for
-better performance.
+Responsify looks for all images by selector `img.responsive` in container element
+`document` by default.
 
-```js
-window.onload = function() {
-  Responsify.init({
-    debounceDelay: 300
-  });
-}
-```
-
-## Advanced Usage
-
-### Customising Image rendering at breakpoints
-
-There are times we want to setup certain crop parameters or quality settings per breakpoint. With Responsify and Scene7
-that is easy to do. Simply add appropriate `data-src=n` attributes to your **IMG** tag. The following example sets up different crop
-parameters for each of the four default breakpoints.
+At the very least assuming you were using Scene7 you would need to populate the `data-responsify`
+attribute to your Scene7 resource location.
 
 ```html
 <img class='responsive'
-  src='http://s7d9.scene7.com/is/image/DEMOAKQA/1440.1'
-  data-src="http://s7d9.scene7.com/is/image/DEMOAKQA/1440.1?resMode=sharp2&qlt=85"
-  data-src-1="cropN=0.16,0.32,0.68,0.459"
-  data-src-2="cropN=0.18,0.32,0.68,0.459"
-  data-src-3="cropN=0.20,0.32,0.68,0.459"
-  data-src-4="cropN=0.22,0.32,0.68,0.459"
+  data-responsify="http://s7d9.scene7.com/is/image/DEMOAKQA/1440.1"
 />
 ```
 
-### Should I use SRC attribute or not?
-
-In most of the examples on this page I've shown the usage of **IMG** tags with predefined `src` attributes already set. You might be wondering
-why I don't just leave that off and let **Responsify** create the the `src` attribute dynamically. Responsify can and will do that for you, however doing so creates
-semantically incorrect **IMG** element that in some browsers would cause a performance degradation. Alternatives in many responsive image solutions opt for things like **srcset** and **picturefill**.
-I choose not to go that way as it adds a lot of semantically un standardised markup to your code.
-
-Instead I like the approach of providing a very low resolution image up front to combat **FOUC** (flash of unstyled content) and then render in the higher quality images when the JavaScript is executed. This has
-the benefit of natively supporting non JavaScript browsers without any change.
-
-Alternatively if you choose for more of a traditional responsive image solution you could still do the following.
+Responsify would detect the image and compute its width dynamically based on its parent
+element and populate the `src` attribute. The resulting markup would be something like
+below assuming the parent element was 500 pixels.
 
 ```html
 <img class='responsive'
-  data-src="http://s7d9.scene7.com/is/image/DEMOAKQA/1440.1?resMode=sharp2&qlt=85"
+  src="http://s7d9.scene7.com/is/image/DEMOAKQA/1440.1?wid=500"
+  data-responsify="http://s7d9.scene7.com/is/image/DEMOAKQA/1440.1"
 />
-<noscript>
-  <img class='responsive'
-    src="http://s7d9.scene7.com/is/image/DEMOAKQA/1440.1?resMode=sharp2&qlt=85"
-  />
-</noscript>
 ```
+
+### Basic Declarative Responsive Image
+
+```html
+<img class='responsive'
+  data-responsify="http://www.test.com/images/"
+  data-responsify-break-a="foo_320.jpg"
+  data-responsify-break-b="foo_640.jpg"
+  data-responsify-break-c="foo_1024.jpg"
+/>
+```
+
+Assuming your on **break-b** the resulting markup.
+
+```html
+<img class='responsive'
+  src="http://www.test.com/images/foo_640.jpg"
+  data-responsify="http://www.test.com/images/"
+  data-responsify-break-a="foo_320.jpg"
+  data-responsify-break-b="foo_640.jpg"
+  data-responsify-break-c="foo_1024.jpg"
+/>
+```
+
+### Options
+
+#### debug
+
+Type: `Boolean` Default: **false**
+
+Whether or not to enable custom Chrome debugging for tracing Responsify events.
+
+#### namespace
+
+Type: `String` Default: **responsify**
+
+The namespace to use for `data-attribute` prefix.
+
+#### selector
+
+Type: `String` Default: **responsify**
+
+The query selector to use when searching for images to process.
+
+#### root
+
+Type: `Element` Default: **document**
+
+The element to listen for mutation changes.
+
+#### dynamicWidth
+
+Type: `Boolean` Default: **true**
+
+Whether or not to add dynamic width calculator to images.
+
+#### breakpoints
+
+Type: `Array[Object]` Default: **Array of breakpoint objects**
+
+Your breakpoint grid
+
+### Events
+
+Responsify publishes out the following events. To subscribe to these you
+simply use `Responsify.on`.
+
+```js
+  Responsify.on('responsify.breakpoint.change', function() {
+    // do something
+  });
+```
+
+#### responsify.breakpoint.change
+
+#### responsify.image.loaded
+
 
 ### Contributing
 
