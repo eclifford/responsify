@@ -19,7 +19,7 @@
     "url": "https://github.com/eclifford/responsify/issues"
   },
   "homepage": "https://github.com/eclifford/responsify",
-  "dependencies": {
+  "devDependencies": {
     "chai": "^1.9.1",
     "grunt": "^0.4.5",
     "grunt-bump": "0.0.14",
@@ -28,16 +28,14 @@
     "grunt-contrib-watch": "^0.6.1",
     "grunt-karma": "^0.8.3",
     "grunt-text-replace": "^0.3.12",
-    "karma": "^0.12.16",
+    "karma": "^0.12.23",
     "karma-chai": "^0.1.0",
     "karma-jquery": "^0.1.0",
     "karma-mocha": "^0.1.4",
     "karma-phantomjs-launcher": "^0.1.4",
     "karma-sinon-chai": "^0.2.0",
     "mocha": "^1.20.1",
-    "phantomjs": "^1.9.7-12"
-  },
-  "devDependencies": {
+    "phantomjs": "^1.9.7-12",
     "karma-coverage": "^0.2.6",
     "karma-coveralls": "^0.1.4"
   }

@@ -3,66 +3,229 @@
     <title>Responsify Demo</title>
     <script src='responsify.js' defer></script>
     <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.css" media="screen" title="no title" charset="utf-8">
+    <link href='http://fonts.googleapis.com/css?family=Carme' rel='stylesheet' type='text/css'>
     <style>
+      body {
+        background-color: rgb(236,236,236);
+        padding-bottom: 100px;
+      }
+      h1 {
+        font-family: 'Carme', sans-serif;
+        font-size: 50px;
+      }
+      h3 {
+        font-family: 'Carme', sans-serif;
+        font-weight: 400;
+        font-size: 20px;
+      }
       .responsive {
-        width: 100%;
+        max-width: 100%;
+      }
+      .row .col-xs-6 {
+        padding: 0px;
+      }
+      .row {
+        background-color: rgb(203,203,203);
+      }
+      .group {
+        background-color: rgb(236,236,236);
+      }
+      .loader {
+        cursor: pointer;
       }
     </style>
     <script>
       document.addEventListener("DOMContentLoaded", function() {
-        Responsify.init({
-          debug: true 
-        });
+        Responsify.init();
       });
     </script>
   </head>
   <body>
-    <input type='button' id='btn-add' value="add image"></input>
     <div class='container' id='container'>
-      <div class="row">
-        <div class="col-md-12">
-          <img class='responsive'
-            data-responsify="http://s7d9.scene7.com/is/image/DEMOAKQA/"
-            data-responsify-break-a="1440.1?resMode=sharp"
-            data-responsify-break-b="1440.2?resMode=sharp"
-            data-responsify-break-c="1440.3?resMode=sharp"
-            data-responsify-break-d="1440.4?resMode=sharp"
-          />
-        </div>
+      <div class='text-right'>
+        <h1>responsify.js</h1>
+      </div>
+      <div class="row group">
+        <h3>Dynamic Widths</h3>
       </div>
       <div class="row">
-       <div class="col-md-12">
+       <div class="col-xs-6">
          <img class='responsive'
-           data-responsify="http://s7d9.scene7.com/is/image/DEMOAKQA/1440.2"
-           data-responsify-break-a="qlt=50"
-           data-responsify-break-b="?qlt=60"
-           data-responsify-break-c="qlt=70"
-           data-responsify-break-d="?qlt=80"
+           data-responsify="http://s7d9.scene7.com/is/image/DEMOAKQA/1440.2?wid={width}&resMode=sharp2"
+         />
+       </div>
+       <div class="col-xs-6">
+         <img class='responsive'
+           data-responsify="http://fakeimg.pl/{width}"
+           data-responsify-break-a="x153"
+           data-responsify-break-b="x211"
+           data-responsify-break-c="x273"
+           data-responsify-break-d="x330"
+         />
+       </div>
+     </div>
+     <div class="row">
+       <div class="col-xs-6">
+         <img class='responsive'
+           data-responsify="http://s7d9.scene7.com/is/image/DEMOAKQA/1440.12?wid={width}&resMode=sharp2"
+         />
+       </div>
+       <div class="col-xs-6">
+         <img class='responsive'
+           data-responsify="http://fakeimg.pl/{width}"
+           data-responsify-break-a="x153?text=break-a"
+           data-responsify-break-b="x211?text=break-b"
+           data-responsify-break-c="x273?text=break-c"
+           data-responsify-break-d="x330?text=break-d"
+         />
+       </div>
+      </div>
+      <div class="row group">
+        <h3>Custom Breakpoint Params</h3>
+      </div>
+      <div class="row">
+       <div class="col-xs-6">
+         <img class='responsive'
+           data-responsify="http://s7d9.scene7.com/is/image/DEMOAKQA/"
+           data-responsify-break-a="1440.14?wid={width}&resMode=sharp2"
+           data-responsify-break-b="1440.3?wid={width}&resMode=sharp2"
+           data-responsify-break-c="1440.4?wid={width}&resMode=sharp2"
+           data-responsify-break-d="1440.1?wid={width}&resMode=sharp2"
+         />
+       </div>
+       <div class="col-xs-6">
+         <img class='responsive'
+           data-responsify="http://fakeimg.pl/{width}"
+            data-responsify-break-a="x153?text=1440.14"
+            data-responsify-break-b="x211?text=1440.3"
+            data-responsify-break-c="x273?text=1440.4"
+            data-responsify-break-d="x330?text=1440.1"
          />
        </div>
       </div>
       <div class="row">
-       <div class="col-md-12">
+       <div class="col-xs-6">
          <img class='responsive'
-           data-responsify="http://s7d9.scene7.com/is/image/DEMOAKQA/1440.3"
-           data-responsify-break-a="qlt=50"
-           data-responsify-break-b="qlt=60"
-           data-responsify-break-c="qlt=70"
-           data-responsify-break-d="qlt=80"
+           data-responsify="http://s7d9.scene7.com/is/image/DEMOAKQA/"
+           data-responsify-break-a="1440.14?wid={width}&resMode=sharp2&op_brightness=0"
+           data-responsify-break-b="1440.3?wid={width}&resMode=sharp2&op_brightness=20"
+           data-responsify-break-c="1440.4?wid={width}&resMode=sharp2&op_brightness=40"
+           data-responsify-break-d="1440.1?wid={width}&resMode=sharp2&op_brightness=60"
+         />
+       </div>
+       <div class="col-xs-6">
+         <img class='responsive'
+           data-responsify="http://fakeimg.pl/{width}"
+            data-responsify-break-a="x153?text=op_brightness&#61;0"
+            data-responsify-break-b="x211?text=op_brightness&#61;20"
+            data-responsify-break-c="x273?text=op_brightness&#61;40"
+            data-responsify-break-d="x330?text=op_brightness&#61;60"
          />
        </div>
       </div>
+      <div class="row">
+       <div class="col-xs-6">
+         <img class='responsive'
+           data-responsify="http://s7d9.scene7.com/is/image/DEMOAKQA/"
+           data-responsify-break-a="1440.14?wid={width}&resMode=sharp2&qlt=40"
+           data-responsify-break-b="1440.3?wid={width}&resMode=sharp2&qlt=60"
+           data-responsify-break-c="1440.4?wid={width}&resMode=sharp2&qlt=80"
+           data-responsify-break-d="1440.1?wid={width}&resMode=sharp2&qlt=100"
+         />
+       </div>
+       <div class="col-xs-6">
+         <img class='responsive'
+           data-responsify="http://fakeimg.pl/{width}"
+            data-responsify-break-a="x153?text=qlt&#61;40"
+            data-responsify-break-b="x211?text=qlt&#61;60"
+            data-responsify-break-c="x273?text=qlt&#61;80"
+            data-responsify-break-d="x330?text=qlt&#61;100"
+         />
+       </div>
+      </div>
+      <div class="row group">
+        <h3>Dynamic Content</h3>
+      </div>
+      <div class="row">
+       <div class="col-xs-6 loader" data-load-url="http://s7d9.scene7.com/is/image/DEMOAKQA/1440.5?wid={width}">
+         <div>
+         <img class='responsive'
+           data-responsify="http://fakeimg.pl/{width}"
+           data-responsify-break-a="x153?text=click to load"
+           data-responsify-break-b="x211?text=click to load"
+           data-responsify-break-c="x273?text=click to load"
+           data-responsify-break-d="x330?text=click to load"
+         />
+       </div>
+       </div>
+       <div class="col-xs-6 loader" data-load-url="http://s7d9.scene7.com/is/image/DEMOAKQA/1440.6?wid={width}">
+         <img class='responsive'
+           data-responsify="http://fakeimg.pl/{width}"
+           data-responsify-break-a="x153?text=click to load"
+           data-responsify-break-b="x211?text=click to load"
+           data-responsify-break-c="x273?text=click to load"
+           data-responsify-break-d="x330?text=click to load"
+         />
+       </div>
+     </div>
+     <div class="row">
+       <div class="col-xs-6 loader" data-load-url="http://s7d9.scene7.com/is/image/DEMOAKQA/1440.7?wid={width}">
+         <img class='responsive'
+           data-responsify="http://fakeimg.pl/{width}"
+           data-responsify-break-a="x153?text=click to load"
+           data-responsify-break-b="x211?text=click to load"
+           data-responsify-break-c="x273?text=click to load"
+           data-responsify-break-d="x330?text=click to load"
+         />
+       </div>
+      <div class="col-xs-6 loader" data-load-url="http://s7d9.scene7.com/is/image/DEMOAKQA/1440.8?wid={width}">
+         <img class='responsive'
+           data-responsify="http://fakeimg.pl/{width}"
+           data-responsify-break-a="x153?text=click to load"
+           data-responsify-break-b="x211?text=click to load"
+           data-responsify-break-c="x273?text=click to load"
+           data-responsify-break-d="x330?text=click to load"
+         />
+       </div>
     </div>
+    <div class="row">
+      <div class="col-xs-6 loader" data-load-url="http://s7d9.scene7.com/is/image/DEMOAKQA/1440.9?wid={width}">
+        <img class='responsive'
+          data-responsify="http://fakeimg.pl/{width}"
+          data-responsify-break-a="x153?text=click to load"
+          data-responsify-break-b="x211?text=click to load"
+          data-responsify-break-c="x273?text=click to load"
+          data-responsify-break-d="x330?text=click to load"
+        />
+      </div>
+     <div class="col-xs-6 loader" data-load-url="http://s7d9.scene7.com/is/image/DEMOAKQA/1440.10?wid={width}">
+        <img class='responsive'
+          data-responsify="http://fakeimg.pl/{width}"
+          data-responsify-break-a="x153?text=click to load"
+          data-responsify-break-b="x211?text=click to load"
+          data-responsify-break-c="x273?text=click to load"
+          data-responsify-break-d="x330?text=click to load"
+        />
+      </div>
+     </div>
+   </div>
+  </div>
     <script>
-      var index = 1;
-       document.getElementById('btn-add').onclick = function() {
-         index = ++index;
-         var container = document.getElementById('container');
-         var img = document.createElement('img');
-         img.className = 'responsive';
-         img.setAttribute('data-responsify', 'http://s7d9.scene7.com/is/image/DEMOAKQA/1440.' + index + '?resMode=sharp2&qlt=85');
-         container.insertBefore(img, container.firstChild);
-       };
+      var loaderDivs = document.querySelectorAll('.loader');
+
+      function loadOnClick(el) {
+        el.addEventListener('click', function(e) {
+          el.innerHTML = '';
+          var img = document.createElement('img');
+          img.className = 'responsive';
+          img.setAttribute('data-responsify', el.getAttribute('data-load-url'));
+          el.appendChild(img);
+        });
+      }
+      for (var i = 0; i < loaderDivs.length; i++) {
+        loadOnClick(loaderDivs[i]);
+      }
+
     </script>
   </body>
 </html>
