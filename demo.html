@@ -2,6 +2,7 @@
   <head>
     <title>Responsify Demo</title>
     <script src='responsify.js' defer></script>
+    <script src='bower_components/logr.js/logr.js'></script>
     <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.css" media="screen" title="no title" charset="utf-8">
     <link href='http://fonts.googleapis.com/css?family=Carme' rel='stylesheet' type='text/css'>
     <style>
@@ -36,6 +37,8 @@
     </style>
     <script>
       document.addEventListener("DOMContentLoaded", function() {
+        var log = Logr.log('responsify');
+        log.attach(Responsify);
         Responsify.init();
       });
     </script>

@@ -16,12 +16,10 @@ describe("responsify", function() {
       mock.expects("findClosestBreakpoint").once();
       mock.expects("setupEvents").once();
       mock.expects("renderImages").once();
-      mock.expects("setupDebug").never();
 
       Responsify.init({
         selector: 'img.res',
-        debounchDelay: 200,
-        debug: false
+        debounchDelay: 200
       });
 
       mock.verify();
@@ -278,19 +276,4 @@ describe("responsify", function() {
       stub.restore();
     });
   });
-
-  describe("setupDebug()", function() {
-    var foo = {
-      baz: function() {},
-      bar: function() {}
-    };
-
-    it("should wrap function object", function() {
-      var spy = sinon.spy(foo, "baz");
-      Responsify.setupDebug(foo);
-      foo.baz();
-      expect(spy).to.have.been.called;
-    });
-  });
-
 });
