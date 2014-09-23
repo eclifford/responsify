@@ -21,11 +21,10 @@
   'use strict';
 
   var Responsify = {
-    version: '0.1.0',
+    version: '0.0.5',
 
     // default options
     options: {
-      debug: false,               // enable console output
       namespace: 'responsify',
       className: 'responsive',    // className to find images
       root: document,             // node for mutation observer to listen on
@@ -82,9 +81,6 @@
 
       // register all events
       this.setupEvents();
-
-      // handle auto debugging
-      if(this.options.debug) this.setupDebug(this);
 
       // process all images currently in DOM
       this.renderImages(this.images);
@@ -397,33 +393,6 @@
         }
       }
       return destination;
-    },
-    // BETA webkit object stack viewer
-    //
-    // @param [Object] obj - the object to setup logging on
-    setupDebug: function(obj) {
-      var self = this,
-          funcs = Object.getOwnPropertyNames(obj);
-
-      for(var i = 0; i < funcs.length; i++) {
-        // we only want functions
-        if(typeof obj[funcs[i]] != 'function') continue;
-
-        /*jshint -W083 */
-        (function (key) {
-          // store original function
-          var func = obj[funcs[key]];
-          // proxy original request through custom console messaging
-          obj[funcs[key]] = function () {
-            console.groupCollapsed("Responsify: %s", funcs[key], [].slice.call(arguments));
-            console.time('time');
-            var value = func.apply(self, arguments);
-            console.timeEnd('time');
-            console.groupEnd();
-            return value;
-          };
-        }(i));
-      }
     }
   };
 
