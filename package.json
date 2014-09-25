@@ -1,6 +1,6 @@
 {
   "name": "responsify",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "Responsify is a src-N based responsive image solution intended to be used with parameter based responsive image services such as Adobe Scene7",
   "author": "Eric Clifford <ericgclifford@gmail.com>",
   "main": "Gruntfile.js",

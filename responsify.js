@@ -21,13 +21,13 @@
   'use strict';
 
   var Responsify = {
-    version: '0.0.6',
+    version: '0.0.7',
 
     // default options
     options: {
       namespace: 'responsify',
-      className: 'responsive',    // className to find images
-      root: document,             // node for mutation observer to listen on
+      selector: 'img,div.responsive',
+      root: document,             
       breakpoints: [
         {
           label: 'break-a',
@@ -89,7 +89,7 @@
     //
     refreshImages: function() {
       // get all responsive images by selector converting
-      this.images = [].slice.call(document.getElementsByClassName(this.options.className));
+      this.images = [].slice.call(document.querySelectorAll(this.options.selector));
     },
     // setup DOM and custom events
     //
@@ -100,7 +100,6 @@
           self.onResizeEvent(window.innerWidth);
         });
       });
-
       // setup watcher to listen for future images inserted into DOM
       this.addMutationObserver(this.options.root);
     },
@@ -136,8 +135,11 @@
         }
       }
     },
+    isDeviceEqualTo: function(device) {
+      return device === this.currentBreakpoint.device;
+    },
     isBreakpointEqualTo: function(breakpoint) {
-      return breakpoint === currentBreakpoint.label;
+      return breakpoint === this.currentBreakpoint.label;
     },
     // process all currently stored images
     //
@@ -152,34 +154,36 @@
     //
     // @param [node] img - the image to process
     //
-    renderImage: function(img) {
-      var baseURI = img.getAttribute('data-' + this.options.namespace) || "",
-          breakpointURI = img.getAttribute("data-" + this.options.namespace + "-" + this.currentBreakpoint.label) || "",
+    renderImage: function(el) {
+      var baseURI = el.getAttribute('data-' + this.options.namespace) || "",
+          breakpointURI = el.getAttribute("data-" + this.options.namespace + "-" + this.currentBreakpoint.label) || "",
           imageURI = "",
           baseWidth = 0,
+          baseHeight = 0,
           ratio = 1,
-          width = 0;
+          width = 0,
+          height = 0;
 
-      // build the image url
+      // combine baseURI and breakpoint data
       imageURI = this.buildImageURI(baseURI, breakpointURI);
 
-      // get parent width
-      baseWidth = this.getClosestSupportedWidth(img.parentElement.clientWidth);
+      // dynamically calculate width
+      if(imageURI.match(/{width}/g)) {
+        baseWidth = this.getClosestSupportedWidth(el.parentElement.clientWidth);
+        ratio = this.getClosestsSupportedPixelRatio(this.getPixelRatio());
+        width = baseWidth * ratio;
+        imageURI = imageURI.replace(/{width}/g, width);
+      }
 
-      // get supported pixel ratio
-      ratio = this.getClosestsSupportedPixelRatio(this.getPixelRatio());
-
-      // computed width based on supported pixel ratio
-      width = baseWidth * ratio;
-
-      // interpolate calculated width
-      imageURI = imageURI.replace(/{width}/g, width);
-
-      // set image src
-      if(img.src !== imageURI) {
-        img.src = imageURI;
-        img.style.width = baseWidth + 'px';
-        this.publish('responsify:image:rendered');
+      if(el.nodeName.toLowerCase() === 'img') {
+        if(el.src !== imageURI) {
+          el.src = imageURI;
+          this.publish('responsify:image:rendered', el);
+        }
+      } else {
+        el.style.backgroundImage = "url('" + imageURI + "')";
+        el.style.backgroundSize = "cover";
+        this.publish('responsify:image:rendered', el);
       }
     },
     // calculates closest width by looking at supported widths
@@ -303,10 +307,8 @@
           if(mutations[mutationIndex].removedNodes) {
             for(var removedNodeIndex = 0; removedNodeIndex < mutations[mutationIndex].removedNodes.length; removedNodeIndex++) {
               var nodeToRemove = mutations[mutationIndex].removedNodes[removedNodeIndex];
-              if(nodeToRemove.className === self.options.className)
-                self.removeImage(nodeToRemove);
-              else {
-                imgs = self.findChildNodesByClass(nodeToRemove, self.options.className);
+              if(nodeToRemove && nodeToRemove.querySelectorAll) {
+                imgs = nodeToRemove.querySelectorAll(self.options.selector);
                 self.removeImages(imgs);
               }
             }
@@ -314,10 +316,8 @@
           if(mutations[mutationIndex].addedNodes) {
             for(var addedNodeIndex = 0; addedNodeIndex < mutations[mutationIndex].addedNodes.length; addedNodeIndex++) {
               var nodeToAdd = mutations[mutationIndex].addedNodes[addedNodeIndex];
-              if(nodeToAdd.className === self.options.className)
-                self.addImage(nodeToAdd);
-              else {
-                imgs = self.findChildNodesByClass(nodeToAdd, self.options.className);
+              if(nodeToAdd && nodeToAdd.querySelectorAll) {
+                imgs = nodeToAdd.querySelectorAll(self.options.selector);
                 self.addImages(imgs);
               }
             }
@@ -329,25 +329,6 @@
         childList: true,
         subtree: true
       });
-    },
-    // recursively find descendent nodes in non live dom element
-    //
-    // @param [element] parent - the element to search
-    // @param [string] className - the className to searh for
-    // @param [Array[element]] els - aggregated found elements
-    //
-    findChildNodesByClass: function(parent, className, els) {
-      var elements = els || [],
-          children = parent.childNodes;
-
-      for (var i = 0; i < children.length; i++) {
-        if (children[i].className === className)
-          elements.push(children[i]);
-        else
-          this.findChildNodesByClass(children[i], className, elements);
-      }
-
-      return elements;
     },
     // simple publish method used internally to notify subscribers
     //

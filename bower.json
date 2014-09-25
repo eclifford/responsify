@@ -2,7 +2,7 @@
   "name": "responsify",
   "main": "responsify.js",
   "description": "",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "homepage": "https://github.com/eclifford/responsify",
   "authors": [
     "eclifford <ericgclifford@gmail.com>"
@@ -20,6 +20,7 @@
     "logr.js": "~0.0.2"
   },
   "dependencies": {
-    "MutationObserver-shim": "~0.2.7"
+    "MutationObserver-shim": "~0.2.7",
+    "logr.js": "~0.0.2"
   }
 }
