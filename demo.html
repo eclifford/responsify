@@ -53,7 +53,7 @@
       </div>
       <div class="row">
         <div class="responsive col-xs-12"
-          data-responsify="http://s7d9.scene7.com/is/image/DEMOAKQA/1440.2?wid={width}&resMode=sharp2" style="height: 100px">
+          data-responsify="http://s7d9.scene7.com/is/image/DEMOAKQA/1440.2?wid={width}&resMode=sharp2" style="height: 300px">
         </div>
       </div>
       <div class="row">
@@ -151,89 +151,6 @@
          />
        </div>
       </div>
-      <div class="row group">
-        <h3>Dynamic Content</h3>
-      </div>
-      <div class="row">
-       <div class="col-xs-6 loader" data-load-url="http://s7d9.scene7.com/is/image/DEMOAKQA/1440.5?wid={width}">
-         <div>
-         <img class='responsive'
-           data-responsify="http://fakeimg.pl/{width}"
-           data-responsify-break-a="x153?text=click to load"
-           data-responsify-break-b="x211?text=click to load"
-           data-responsify-break-c="x273?text=click to load"
-           data-responsify-break-d="x330?text=click to load"
-         />
-       </div>
-       </div>
-       <div class="col-xs-6 loader" data-load-url="http://s7d9.scene7.com/is/image/DEMOAKQA/1440.6?wid={width}">
-         <img class='responsive'
-           data-responsify="http://fakeimg.pl/{width}"
-           data-responsify-break-a="x153?text=click to load"
-           data-responsify-break-b="x211?text=click to load"
-           data-responsify-break-c="x273?text=click to load"
-           data-responsify-break-d="x330?text=click to load"
-         />
-       </div>
-     </div>
-     <div class="row">
-       <div class="col-xs-6 loader" data-load-url="http://s7d9.scene7.com/is/image/DEMOAKQA/1440.7?wid={width}">
-         <img class='responsive'
-           data-responsify="http://fakeimg.pl/{width}"
-           data-responsify-break-a="x153?text=click to load"
-           data-responsify-break-b="x211?text=click to load"
-           data-responsify-break-c="x273?text=click to load"
-           data-responsify-break-d="x330?text=click to load"
-         />
-       </div>
-      <div class="col-xs-6 loader" data-load-url="http://s7d9.scene7.com/is/image/DEMOAKQA/1440.8?wid={width}">
-         <img class='responsive'
-           data-responsify="http://fakeimg.pl/{width}"
-           data-responsify-break-a="x153?text=click to load"
-           data-responsify-break-b="x211?text=click to load"
-           data-responsify-break-c="x273?text=click to load"
-           data-responsify-break-d="x330?text=click to load"
-         />
-       </div>
-    </div>
-    <div class="row">
-      <div class="col-xs-6 loader" data-load-url="http://s7d9.scene7.com/is/image/DEMOAKQA/1440.9?wid={width}">
-        <img class='responsive'
-          data-responsify="http://fakeimg.pl/{width}"
-          data-responsify-break-a="x153?text=click to load"
-          data-responsify-break-b="x211?text=click to load"
-          data-responsify-break-c="x273?text=click to load"
-          data-responsify-break-d="x330?text=click to load"
-        />
-      </div>
-     <div class="col-xs-6 loader" data-load-url="http://s7d9.scene7.com/is/image/DEMOAKQA/1440.10?wid={width}">
-        <img class='responsive'
-          data-responsify="http://fakeimg.pl/{width}"
-          data-responsify-break-a="x153?text=click to load"
-          data-responsify-break-b="x211?text=click to load"
-          data-responsify-break-c="x273?text=click to load"
-          data-responsify-break-d="x330?text=click to load"
-        />
-      </div>
-     </div>
    </div>
-  </div>
-    <script>
-      var loaderDivs = document.querySelectorAll('.loader');
-
-      function loadOnClick(el) {
-        el.addEventListener('click', function(e) {
-          el.innerHTML = '';
-          var img = document.createElement('img');
-          img.className = 'responsive';
-          img.setAttribute('data-responsify', el.getAttribute('data-load-url'));
-          el.appendChild(img);
-        });
-      }
-      for (var i = 0; i < loaderDivs.length; i++) {
-        loadOnClick(loaderDivs[i]);
-      }
-
-    </script>
   </body>
 </html>

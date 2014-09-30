@@ -21,35 +21,30 @@
   'use strict';
 
   var Responsify = {
-    version: '0.0.7',
+    version: '0.0.8',
 
     // default options
     options: {
       namespace: 'responsify',
-      selector: 'img,div.responsive',
-      root: document,             
+      selector: 'img.responsive,div.responsive',
       breakpoints: [
         {
           label: 'break-a',
-          device: 'mobile',
           enter: 0,
           exit: 765
         },
         {
           label: 'break-b',
-          device: 'tablet',
           enter: 768,
           exit: 991
         },
         {
           label: 'break-c',
-          device: 'desktop',
           enter: 992,
           exit: 1199
         },
         {
           label: 'break-d',
-          device: 'desktop',
           enter: 1200,
           exit: 10000
         }
@@ -100,8 +95,6 @@
           self.onResizeEvent(window.innerWidth);
         });
       });
-      // setup watcher to listen for future images inserted into DOM
-      this.addMutationObserver(this.options.root);
     },
     // on a resize event determine if we have entered a new breakpoint and if so
     // notify subscribers and process images
@@ -135,9 +128,11 @@
         }
       }
     },
-    isDeviceEqualTo: function(device) {
-      return device === this.currentBreakpoint.device;
-    },
+    // return whether or not the supplied breakpoint label
+    // is the currentBreakpoint
+    //
+    // @param [string] breakpiont - the label of the breakpoint to test
+    //
     isBreakpointEqualTo: function(breakpoint) {
       return breakpoint === this.currentBreakpoint.label;
     },
@@ -291,44 +286,6 @@
       for(var i = 0; i < imgs.length; i++) {
         this.removeImage(imgs[i]);
       }
-    },
-    // mutation observer that listens for new responsive image elements
-    // added and removed from the document being watched
-    //
-    // @param [element] element - the DOM element to observe
-    //
-    addMutationObserver: function(element) {
-      var self = this,
-          MutationObserver = window.MutationObserver || window.WebKitMutationObserver || window.MozMutationObserver;
-
-      var observer = new MutationObserver(function (mutations) {
-        var imgs = [];
-        for(var mutationIndex = 0; mutationIndex < mutations.length; mutationIndex++) {
-          if(mutations[mutationIndex].removedNodes) {
-            for(var removedNodeIndex = 0; removedNodeIndex < mutations[mutationIndex].removedNodes.length; removedNodeIndex++) {
-              var nodeToRemove = mutations[mutationIndex].removedNodes[removedNodeIndex];
-              if(nodeToRemove && nodeToRemove.querySelectorAll) {
-                imgs = nodeToRemove.querySelectorAll(self.options.selector);
-                self.removeImages(imgs);
-              }
-            }
-          }
-          if(mutations[mutationIndex].addedNodes) {
-            for(var addedNodeIndex = 0; addedNodeIndex < mutations[mutationIndex].addedNodes.length; addedNodeIndex++) {
-              var nodeToAdd = mutations[mutationIndex].addedNodes[addedNodeIndex];
-              if(nodeToAdd && nodeToAdd.querySelectorAll) {
-                imgs = nodeToAdd.querySelectorAll(self.options.selector);
-                self.addImages(imgs);
-              }
-            }
-          }
-        }
-      });
-
-      observer.observe(element, {
-        childList: true,
-        subtree: true
-      });
     },
     // simple publish method used internally to notify subscribers
     //

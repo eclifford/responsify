@@ -9,16 +9,13 @@ dynamic image solutions such as Adobe Scene7.
 - Support for declarative images per breakpoint if you want to serve your own responsive images
 - Built in customizable breakpoint detection/notification for use in responsive grids such as
 those found in Bootstrap and Foundation
-- Automatic detection and processing of all responsive images added post page load. Perfect for SPA's and sites with
-a lot of dynamic content.
 - No third party libraries required
 - Non blocking script
 
 ## Why Responsify?
 
 Responsify was born out of the need for a **Scene7** based responsive solution for a large enterprise content managed web
-application. We needed something that was **fast**, **non blocking**, **standalone**, **convention over declaration**
-and capable of **automatically** handling images loaded post page load through **RequireJS**.
+application. We needed something that was **fast**, **non blocking**, **standalone** and relied on **convention over declaration**.
 
 In the end we created a solution that should work not only for **Scene7** but for any **src-N** based
 responsive image solution. The future may be **PictureFill** and **srcset** but the verbose non dynamic
@@ -46,7 +43,7 @@ use `defer` to have responsify executed after DOM creation.
 ### Initialize Responsify
 
 Responsify needs to be told when to initialize. It is important that this is done after the DOM has been rendered. In the below
-example this is done on the `DOMContentLoaded` event, but optionally this may be done in **jQuerys** `onReady` event.
+example this is done on the `DOMContentLoaded` event, but optionally this may be done in **jQuery** `onReady` event.
 
 
 Vanilla Face
@@ -137,12 +134,6 @@ Type: `String` Default: **responsify**
 
 The query selector to use when searching for images to process.
 
-#### root
-
-Type: `Element` Default: **document**
-
-The element to listen for mutation changes.
-
 #### dynamicWidth
 
 Type: `Boolean` Default: **true**
@@ -161,14 +152,14 @@ Responsify publishes out the following events. To subscribe to these you
 simply use `Responsify.on`.
 
 ```js
-  Responsify.on('responsify.breakpoint.change', function() {
+  Responsify.on('responsify:breakpoint:change', function() {
     // do something
   });
 ```
 
-#### responsify.breakpoint.change
+#### responsify:breakpoint:change
 
-#### responsify.image.loaded
+#### responsify:image:loaded
 
 
 ### Contributing

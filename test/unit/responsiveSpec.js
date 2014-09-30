@@ -86,60 +86,6 @@ describe("responsify", function() {
     });
   });
 
-  describe("addMutationObserver()", function() {
-    var clock;
-    beforeEach(function(done) {
-      $('#fixture').load('base/test/fixtures/images.html', function() {
-        clock = sinon.useFakeTimers();
-        Responsify.addMutationObserver($('#fixture')[0]);
-        done();
-      });
-    });
-    afterEach(function() {
-      $('#fixture').empty();
-      clock.restore();
-    });
-    it("should detect added images and call addImage", function() {
-      var stub = sinon.stub(Responsify, "addImages");
-      var $img = $("<img class='responsive'>");
-      $('#fixture').append($img);
-      clock.tick(30);
-      // TODO: test calledWith
-      expect(stub).to.have.been.called;
-      stub.restore();
-    });
-    it("should detect a single removed image from watched element and call removeImage", function() {
-      var stub = sinon.stub(Responsify, "removeImages");
-      var $img = $("img#a");
-      $img.remove();
-      clock.tick(30);
-      // TODO: test calledWith
-      expect(stub).to.have.been.called;
-      stub.restore();
-    });
-    it("should detect a child image removed from a watched element and call removeImage", function() {
-      var stub = sinon.stub(Responsify, "removeImages");
-      var $container = $('#container');
-      var $img = $("img#a");
-      $container.remove();
-      clock.tick(30);
-      // TODO: test calledWith
-      expect(stub).to.have.been.called;
-      stub.restore();
-    });
-    it("should listen for changed image elements deeply nested on a specified DOM node", function() {
-      var stub = sinon.stub(Responsify, "addImages");
-      var $div = $("<div>");
-      var $img = $("<img class='responsive'>");
-      $div.append($img);
-      $('#fixture').append($div);
-      clock.tick(30);
-      // TODO: test calledWith
-      expect(stub).to.have.been.called;
-      stub.restore();
-    });
-  });
-
   describe("buildImageUrl()", function() {
     it("should properly combine two paths", function() {
       var url = Responsify.buildImageURI("http://www.test.com/", "foo.jpg");

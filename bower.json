@@ -1,8 +1,8 @@
 {
   "name": "responsify",
   "main": "responsify.js",
-  "description": "",
-  "version": "0.0.7",
+  "description": "Responsify is a src-N based responsive image solution intended to be used with parameter based responsive image services such as Adobe Scene7",
+  "version": "0.0.8",
   "homepage": "https://github.com/eclifford/responsify",
   "authors": [
     "eclifford <ericgclifford@gmail.com>"
@@ -17,10 +17,8 @@
   "devDependencies": {
     "bootstrap": "~3.2.0",
     "jquery": "~2.1.1",
-    "logr.js": "~0.0.2"
+    "logr.js": "~0.1.0"
   },
   "dependencies": {
-    "MutationObserver-shim": "~0.2.7",
-    "logr.js": "~0.0.2"
   }
 }
