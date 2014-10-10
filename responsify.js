@@ -4,7 +4,7 @@
  *
  * Author: Eric Clifford
  * Email: ericgclifford@gmail.com
- * Date: 09.17.2014
+ * Date: 10.10.2014
  *
  */
 (function(root, factory) {
@@ -59,14 +59,18 @@
 
     events: {},
 
-    // responsify initialize
-    // call this once your DOM has been created
-    //
-    // @param [object] config - override default settings object
-    //
+    /**
+     * Initialize Responsify
+     *
+     * @example
+     *     Responsify.init()
+     *
+     * @param {Object} config the configuration object to override defaults
+     * @api public
+     */
     init: function(config) {
       // extend responsify options with passed in configuration
-      if(config) this.extend(this.options, config);
+      if (config) this.extend(this.options, config);
 
       // get the current breakpoint
       this.currentBreakpoint = this.findClosestBreakpoint(window.innerWidth);
@@ -80,14 +84,25 @@
       // process all images currently in DOM
       this.renderImages(this.images);
     },
-    // find all and store all responsive images on the document
-    //
+    /**
+     * Find all images on the DOM that match selector and store them
+     *
+     * @example
+     *     Responsify.refreshImages()
+     *
+     * @api public
+     */
     refreshImages: function() {
-      // get all responsive images by selector converting
       this.images = [].slice.call(document.querySelectorAll(this.options.selector));
     },
-    // setup DOM and custom events
-    //
+    /**
+     * Setup event handlers for Responsify lifecycle
+     *
+     * @example
+     *     Responsify.setupEvents()
+     *
+     * @api public
+     */
     setupEvents: function() {
       var self = this;
       window.addEventListener("resize", function() {
@@ -96,62 +111,125 @@
         });
       });
     },
-    // on a resize event determine if we have entered a new breakpoint and if so
-    // notify subscribers and process images
-    //
-    // @param [int] width - the width of the viewport
-    //
+    /**
+     * Upon resize test for breakpoint change and re-render images
+     *
+     * @example
+     *     Responsify.onResizeEvent(100)
+     *
+     * @param {Number} width the width of the current window
+     * @api public
+     */
     onResizeEvent: function(width) {
-      var breakpoint = this.findClosestBreakpoint(width);
-      if(breakpoint != this.currentBreakpoint) {
+      var breakpoint = null;
+
+      if (isNaN(width))
+        throw Error("Responsify.onResizeEvent(): expects number");
+
+      breakpoint = this.findClosestBreakpoint(width);
+      if (breakpoint != this.currentBreakpoint) {
         this.setBreakpoint(breakpoint);
         this.renderImages(this.images);
       }
     },
-    // notify breakpoint subscribers of a change
-    //
-    // @param [object] breakpoint - the breakpoint to make current
-    //
+    /**
+     * Set the current active breakpoint to the one supplied
+     *
+     * @example
+     *     Responsify.setBreakpoint({Object})
+     *
+     * @param {Object} breakpoint the breakpoint to set
+     * @api public
+     */
     setBreakpoint: function(breakpoint) {
+      if (!breakpoint && typeof breakpoint !== 'object')
+        throw new Error("Responsify.setBreakpoint(): expects breakpoint object to set");
+
       this.currentBreakpoint = breakpoint;
       this.publish('responsify:breakpoint:change', this.currentBreakpoint);
     },
-    // provided the current width of window return the closest matching
-    // breakpoint
-    //
-    // @param [int] width - the width to calculate breakpoint based upon
-    //
+    /**
+     * Return the closest breakpoint for the supplied width
+     *
+     * @example
+     *     Responsify.findClosestBreakpoint(100)
+     *
+     * @param {Number} width the width to test for a breakpoint
+     * @return {Object} the breakpoint that matches supplied width
+     * @api public
+     */
     findClosestBreakpoint: function(width) {
-      for(var i = 0; i < this.options.breakpoints.length; i++) {
-        if(width >= this.options.breakpoints[i].enter && width <= this.options.breakpoints[i].exit) {
+      if (isNaN(width))
+        throw new Error("Responsify.findClosestBreakpoint(): expects parameter width of type Number");
+
+      for (var i = 0; i < this.options.breakpoints.length; i++) {
+        if (width >= this.options.breakpoints[i].enter && width <= this.options.breakpoints[i].exit) {
           return this.options.breakpoints[i];
         }
       }
     },
-    // return whether or not the supplied breakpoint label
-    // is the currentBreakpoint
-    //
-    // @param [string] breakpiont - the label of the breakpoint to test
-    //
+    /**
+     * Return whether or not the supplied breakpoint is current
+     *
+     * @example
+     *     Responsify.isBreakpointEqualTo('break-a')
+     *
+     * @param {String} breakpoint the breakpoint label to test
+     * @return {Boolean} whether or not the breakpoint is active
+     * @api public
+     */
     isBreakpointEqualTo: function(breakpoint) {
+      if (typeof breakpoint !== 'string')
+        throw new Error("Responsify.isBreakpointEqualTo(): expects parameter breakpoint of type String");
+
       return breakpoint === this.currentBreakpoint.label;
     },
-    // process all currently stored images
-    //
-    // @param [Array] images - the images to process
-    //
+    /**
+     * Return whether or not the supplied HTMLElement is visible or not
+     *
+     * @example
+     *     Responsify.isElementVisible(<HTMLElement>)
+     *
+     * @param {HTMLElement} images the images to render
+     * @return {Boolean} whether or not the element is visible
+     * @api public
+     */
+    isElementVisible: function(el) {
+      if (!(el && el instanceof HTMLElement))
+        throw new Error("Responsify.isElementVisible(): expects parameter el of type HTMLElement");
+
+      return el.parentElement.offsetWidth > 0 && el.parentElement.offsetHeight > 0;
+    },
+    /**
+     * Render an Array or NodeList of images that are visible
+     *
+     * @example
+     *     Responsify.renderImages([<HTMLElement>])
+     *
+     * @param {Array|NodeList} images the images to render
+     * @api public
+     */
     renderImages: function(images) {
-      for(var i = 0; i < images.length; i++) {
-        this.renderImage(images[i]);
+      if (!images)
+        throw new Error("Responsify.renderImages(): expects parameter images of type Array or NodeList");
+
+      for (var i = 0; i < images.length; i++) {
+        if (this.isElementVisible(images[i]))
+          this.renderImage(images[i]);
       }
     },
-    // update an images src attribute with base parameters and computed width
-    //
-    // @param [node] img - the image to process
-    //
+    /**
+     * Render an image or background div
+     *
+     * @example
+     *     Responsify.renderImage(<HTMLElement>)
+     *
+     * @param {HTMLElement} el the element to render
+     * @api public
+     */
     renderImage: function(el) {
-      var baseURI = el.getAttribute('data-' + this.options.namespace) || "",
-          breakpointURI = el.getAttribute("data-" + this.options.namespace + "-" + this.currentBreakpoint.label) || "",
+      var baseURI = "",
+          breakpointURI = "",
           imageURI = "",
           baseWidth = 0,
           baseHeight = 0,
@@ -159,76 +237,126 @@
           width = 0,
           height = 0;
 
+      if (!(el && el instanceof HTMLElement))
+        throw new Error("Responsify.renderImage(): expects parameter el of type HTMLElement");
+
+      // read in base URI and current breakpoint URI from data attributes
+      baseURI = el.getAttribute('data-' + this.options.namespace) || "";
+      breakpointURI = el.getAttribute("data-" + this.options.namespace + "-" + this.currentBreakpoint.label) || "";
+
       // combine baseURI and breakpoint data
       imageURI = this.buildImageURI(baseURI, breakpointURI);
 
       // dynamically calculate width
-      if(imageURI.match(/{width}/g)) {
+      if (imageURI.match(/{width}/g)) {
         baseWidth = this.getClosestSupportedWidth(el.parentElement.clientWidth);
-        ratio = this.getClosestsSupportedPixelRatio(this.getPixelRatio());
+        ratio = this.getClosestSupportedPixelRatio(this.getPixelRatio());
         width = baseWidth * ratio;
         imageURI = imageURI.replace(/{width}/g, width);
       }
 
+      // render image or background image div
       if(el.nodeName.toLowerCase() === 'img') {
-        if(el.src !== imageURI) {
+        if(el.src !== imageURI)
           el.src = imageURI;
-          this.publish('responsify:image:rendered', el);
-        }
       } else {
         el.style.backgroundImage = "url('" + imageURI + "')";
         el.style.backgroundSize = "cover";
-        this.publish('responsify:image:rendered', el);
       }
+
+      // notify subscribers
+      this.publish('responsify:image:rendered', el);
     },
-    // calculates closest width by looking at supported widths
-    // and returns the closest match without downscaling
-    //
-    // @param [int] width - the width to calculate from
-    //
+    /**
+     * Find closest supported matching width
+     *
+     * @example
+     *     Responsify.getClosestSupportedWidth(120)
+     *
+     * @param {Number} width the width to test
+     * @return {Number} the closest supported width
+     * @api public
+     */
     getClosestSupportedWidth: function(width) {
       var i = this.options.supportedWidths.length,
           closestWidth = 0;
-      if(i === 0)
+
+      if (isNaN(width))
+        throw new Error("Responsify.getClosestSupportedWidth(): expects width parameter to exist and be a number");
+
+      if (i === 0)
         return width;
-      while(i--) {
+
+      while (i--) {
         if(width <= this.options.supportedWidths[i]) {
           closestWidth = this.options.supportedWidths[i];
         }
       }
       return closestWidth;
     },
-    // return the current supported device pixel ratio
-    //
+    /**
+     * Query the window object for the current devices pixel ratio
+     *
+     * @example
+     *     Responsify.getPixelRatio()
+     *
+     * @return {Number} the closest supported device pixel ratio
+     * @api public
+     */
     getPixelRatio: function() {
       return window.devicePixelRatio || 1;
     },
-    // based on device pixel ratio find the closest ratio we have
-    // image support for
-    //
-    // @param [int] ratio - the ratio to find closest match for
-    //
-    getClosestsSupportedPixelRatio: function(ratio) {
+    /**
+     * Determine closest supported pixel ratio
+     *
+     * @example
+     *     Responsify.getClosestSupportedPixelRatio(1)
+     *
+     * @param {Number} ratio the ratio to test
+     * @return {Number} the closest supported ratio
+     * @api public
+     */
+    getClosestSupportedPixelRatio: function(ratio) {
       var i = this.options.supportedPixelDensity.length,
           closestRatio = 1;
-      while(i--) {
-        if(ratio <= this.options.supportedPixelDensity[i])
+
+      if (isNaN(ratio))
+        throw new Error("Responsify.getClosestSupportedPixelRatio(): expects parameter ratio to exist and be a number");
+
+      while (i--) {
+        if (ratio <= this.options.supportedPixelDensity[i])
           closestRatio = this.options.supportedPixelDensity[i];
       }
       return closestRatio;
     },
-    // build the image URI based on base plus
-    // calculation of breakpointURI
-    //
+    /**
+     * Combine baseURI with current breakpoint parameters
+     *
+     * @example
+     *     Responsify.buildImageURI("http://www.test.com", "?foo=test")
+     *
+     * @param {String} baseURI the base uri
+     * @param {String} breakpointURI the breakpoint uri to append
+     * @return {String} the built uri
+     * @api public
+     */
     buildImageURI: function(baseURI, breakpointURI) {
-      var uri = "";
+      var uri = "",
+          obj = {};
+
+      if (typeof baseURI !== 'string')
+        throw new Error("Responsify.buildImageURI(): expects parameter baseURI to exist and be of type string");
+
+      if (typeof breakpointURI !== 'string')
+        throw new Error("Responsify.buildImageURI(): expects parameter breakpointURI to exist and be of type string");
+
       // querystring or path + querystring
-      if(breakpointURI.indexOf('?') !== -1) {
-        var obj = breakpointURI.split('?');
+      if (breakpointURI.indexOf('?') !== -1) {
+        obj = breakpointURI.split('?');
         uri = this.appendQueryString(baseURI + obj[0], obj[1]);
       }
       // just querystring
-      else if(breakpointURI.indexOf('=') !== -1) {
+      else if (breakpointURI.indexOf('=') !== -1) {
         uri = this.appendQueryString(baseURI, breakpointURI);
       }
       // just path
@@ -237,94 +365,205 @@
       }
       return uri;
     },
-    // append a query string on to an existing uri cleaning
-    // up seperating characters if necessary
-    //
-    // @param [string] uri - the base URI
-    // @param [string] query - the query to append to URI
-    //
+    /**
+     * Append query string to passed base URI
+     *
+     * @example
+     *     Responsify.appendQueryString("http://www.test.com", "?foo=test")
+     *
+     * @param {String} uri the base uri
+     * @param {String} query the querystring to add
+     * @return {String} the built uri
+     * @api public
+     */
     appendQueryString: function(uri, query) {
-      if(!query) return uri;
+      var seperator;
+
+      if (typeof uri !== 'string')
+        throw new Error("Responsify.appendQueryString(): expects parameter uri to exist and be of type string");
+
+      if (!query)
+        return uri;
+
       query = query.replace(/^(&|\?)/, '');
-      var separator = uri.indexOf('?') !== -1 ? '&' : '?';
-      return uri + separator + query;
+      seperator = uri.indexOf('?') !== -1 ? '&' : '?';
+      return uri + seperator + query;
     },
-    // once image is detected by mutation observor we process it
-    //
-    // @param [node] img - the image that was added to dom
-    //
+    /**
+     * Add an image to internal managed array
+     *
+     * @example
+     *     Responsify.addImage(<img>)
+     *
+     * @param {HTMLElement} img the image to add
+     * @api public
+     */
     addImage: function(img) {
+      if (!(img && img instanceof HTMLElement))
+        throw new Error("Responsify.addImage(): expects parameter img to exist and be of type HTMLElement");
+
       this.images.push(img);
       this.renderImage(img);
     },
-    // add each image
-    //
-    // @param [array[element]] imgs - the images to add
-    //
+    /**
+     * Add an array of images to internal managed array
+     *
+     * @example
+     *     Responsify.addImages([<img>, <img>])
+     *
+     * @param {Array} imgs the images to add
+     * @api public
+     */
     addImages: function(imgs) {
+      if (!(imgs && imgs instanceof HTMLElement))
+        throw new Error("Responsify.removeImages(): expects parameter img to exist and be an HTMLElement");
+
       for(var i = 0; i < imgs.length; i++) {
         this.addImage(imgs[i]);
       }
     },
-    // remove an image from the saved image list
-    //
-    // @param [element] img - the image the find and remove
-    //
+    /**
+     * Remove supplied image from internal managed array
+     *
+     * @example
+     *     Responsify.removeImage(<img>)
+     *
+     * @param {HTMLElement} img the image to remove
+     * @api public
+     */
     removeImage: function(img) {
+      if (!(img && img instanceof HTMLElement))
+        throw new Error("Responsify.removeImages(): expects parameter img to exist and be an HTMLElement");
+
       var i = this.images.length;
-      while(i--) {
-        if(img === this.images[i]) {
+      while (i--) {
+        if (img === this.images[i]) {
           this.images.splice(i, 1);
         }
       }
     },
-    // for each provided image call removeImage
-    //
-    // @param [Array[element]] imgs - the images to remove
-    //
+    /**
+     * Remove images from internal managed array
+     *
+     * @example
+     *     Responsify.removeImages([<img>,<img>])
+     *
+     * @param {Array} imgs the images to remove
+     * @api public
+     */
     removeImages: function(imgs) {
-      for(var i = 0; i < imgs.length; i++) {
+      if (toString.call(imgs) !== "[object NodeList]")
+        throw new Error("Responsify.removeImages(): expects parameter imgs to exist and be an array");
+
+      for (var i = 0; i < imgs.length; i++) {
         this.removeImage(imgs[i]);
       }
     },
-    // simple publish method used internally to notify subscribers
-    //
-    // @param topic - the topic to publish on
-    //
+    /**
+     * Simple publish method for notifing subscribers of an event
+     *
+     * @example
+     *     Responsify.publish('event:name');
+     *
+     * @param {String} topic the topic to publish
+     * @api public
+     */
     publish: function(topic) {
-      var subs = this.events[topic],
-          len = subs ? subs.length : 0,
-          args = [].slice.call(arguments, 1);
+      var subs, len;
+
+      if (typeof topic !== 'string')
+        throw new Error("Responsify.publish(): expects parameter topic to exist and be type string");
+
+      subs = this.events[topic];
+      len = subs ? subs.length : 0;
 
       //can change loop or reverse array if the order matters
       while (len--) {
-        subs[len].callback.apply(subs[len].context, args);
+        subs[len].handler.apply(subs[len].context, [].slice.call(arguments, 1));
       }
     },
-    // simple subscribe method for responsify subscribers
-    // to be notified of internal changes
-    //
-    // @param topic - the topic to subscribe to
-    // @param callback - the callback to execute
-    // @param context - the context in which to execute the callback
-    //
-    on: function(topic, callback, context) {
-      if(!this.events[topic]) {
+    /**
+     * Simple subscribe method for adding handlers to event topics.
+     *
+     * @example
+     *     var handler = function() {};
+     *     Responsify.on('event:name', handler);
+     *
+     * @param {String} topic the topic to remove handler from
+     * @param {Function} handler the function to remove
+     * @param {Object} context the context of `this` in which the handler should execute
+     * @api public
+     */
+    on: function(topic, handler, context) {
+      if (typeof topic !== 'string')
+        throw new Error("Responsify.on(): expects parameter topic to exist and be type string");
+
+      if (typeof handler !== 'function')
+        throw new Error("Responsify.on(): expects parameter handler to exist and be type function");
+
+      if (!this.events[topic]) {
         this.events[topic] = [];
       }
       this.events[topic].push({
-        callback: callback,
+        handler: handler,
         context: context || this
       });
     },
-    // Simple deep extend with array overwrite
-    //
-    // @param [Object] target - the target object to extend
-    // @param [Array] source - an array of object to extend the target with
-    //
+    /**
+     * Simple unsubscribe method for removing subscribers by stored handler from
+     * internal events hash.
+     *
+     * @example
+     *     var handler = function() {};
+     *     Responsify.off('event:name', handler);
+     *
+     * @param {String} topic the topic to remove handler from
+     * @param {Function} handler the function to remove
+     * @api public
+     */
+    off: function(topic, handler) {
+      var i = 0;
+
+      if (typeof topic !== 'string')
+        throw new Error("Responsify.off(): expects parameter topic to exist and be type string");
+
+      if (typeof handler !== 'function')
+        throw new Error("Responsify.off(): expects parameter handler to exist and be type function");
+
+      if (this.events[topic]) {
+        i = this.events[topic].length;
+
+        while (i--) {
+          if (!handler || this.events[topic][i].callback === handler) {
+            this.events[topic].splice(i, 1);
+          }
+        }
+      }
+    },
+    /**
+     * Extend the destination object by coping over all properties recursively from
+     * source object.
+     *
+     * @example
+     *     Responsify.extend({ foo: 'bar'}, { baz: 'woz'});
+     *     // => { foo: 'bar', baz: 'woz' }
+     *
+     * @param {Object} destination object to extend to
+     * @param {Object} source object to extend from
+     * @return {Object} the extended destination object
+     * @api public
+     */
     extend: function(destination, source) {
-      for(var prop in source) {
-        if(typeof source[prop] === 'object' && Object.prototype.toString.call(source[prop]) !== '[object Array]') {
+      if (typeof destination !== 'object')
+        throw new Error("Responsify.extend(): expects destination paramter to exist and be an object");
+
+      if (typeof source !== 'object')
+        throw new Error("Responsify.extend(): expects source paramter to exist and be an object");
+
+      // copy over all properties from source object to destination object
+      for (var prop in source) {
+        // if property is an object but not an array recursively copy
+        if (typeof source[prop] === 'object' && Object.prototype.toString.call(source[prop]) !== '[object Array]') {
           destination[prop] = this.extend(destination[prop], source[prop]);
         } else {
           destination[prop] = source[prop];

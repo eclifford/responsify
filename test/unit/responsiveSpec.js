@@ -62,10 +62,20 @@ describe("responsify", function() {
   });
 
   describe("renderImages()", function() {
+    before(function(done) {
+      $('#fixture').load('base/test/fixtures/images.html', function() {
+        done();
+      });
+      Responsify.currentBreakpoint = Responsify.options.breakpoints[0];
+    });
+    after(function() {
+      $('#fixture').empty();
+    });
     it("should call renderImage on all images", function() {
       var stub = sinon.stub(Responsify, "renderImage");
-      Responsify.renderImages([{}, {}, {}]);
-      expect(stub).to.have.been.calledThrice;
+      var imgs = document.getElementsByClassName('responsive');
+      Responsify.renderImages(imgs);
+      expect(stub).to.have.been.calledTwice;
       stub.restore();
     });
   });
@@ -86,7 +96,7 @@ describe("responsify", function() {
     });
   });
 
-  describe("buildImageUrl()", function() {
+  describe("buildImageURI()", function() {
     it("should properly combine two paths", function() {
       var url = Responsify.buildImageURI("http://www.test.com/", "foo.jpg");
       expect(url).to.equal("http://www.test.com/foo.jpg");
@@ -196,18 +206,47 @@ describe("responsify", function() {
     });
     it("should remove an image properly", function() {
       $img = $('img#a')[0];
-      expect(Responsify.images.length).to.equal(1);
+      expect(Responsify.images.length).to.equal(2);
       Responsify.removeImage($img);
-      expect(Responsify.images.length).to.equal(0);
+      expect(Responsify.images.length).to.equal(1);
     });
   });
 
   describe("removeImages", function() {
+    beforeEach(function(done) {
+      $('#fixture').load('base/test/fixtures/images.html', function() {
+        Responsify.refreshImages();
+        done();
+      });
+    });
+    afterEach(function() {
+      $('#fixture').empty();
+    });
     it("should call removeImage on all items in the images array", function() {
       var stub = sinon.stub(Responsify, "removeImage");
-      Responsify.removeImages([{}, {}, {}]);
-      expect(stub).to.have.been.calledThrice;
+      var imgs = document.getElementsByClassName('responsive');
+      Responsify.removeImages(imgs);
+      expect(stub).to.have.been.calledTwice;
       stub.restore();
+    });
+  });
+
+  describe("on()", function() {
+    it("should call appropriate callback", function() {
+      var spy = sinon.spy();
+      Responsify.on('foo', spy);
+      Responsify.publish('foo');
+      expect(spy).to.have.been.called;
+    });
+  });
+
+  describe.skip("off()", function() {
+    it("should no longer listen for events on unsubscribed topics", function() {
+      var spy = sinon.spy();
+      Responsify.on('foo', spy);
+      Responsify.off('foo', spy);
+      Responsify.publish('foo');
+      expect(spy).to.not.have.been.called;
     });
   });
 });
