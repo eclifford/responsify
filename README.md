@@ -76,18 +76,7 @@ attribute to your Scene7 resource location.
 
 ```html
 <img class='responsive'
-  data-responsify="http://s7d9.scene7.com/is/image/DEMOAKQA/1440.1"
-/>
-```
-
-Responsify would detect the image and compute its width dynamically based on its parent
-element and populate the `src` attribute. The resulting markup would be something like
-below assuming the parent element was 500 pixels.
-
-```html
-<img class='responsive'
-  src="http://s7d9.scene7.com/is/image/DEMOAKQA/1440.1?wid=500"
-  data-responsify="http://s7d9.scene7.com/is/image/DEMOAKQA/1440.1"
+  data-responsify="http://s7d9.scene7.com/is/image/DEMOAKQA/1440.1?wid={width}"
 />
 ```
 
@@ -116,12 +105,6 @@ Assuming your on **break-b** the resulting markup.
 
 ### Options
 
-#### debug
-
-Type: `Boolean` Default: **false**
-
-Whether or not to enable custom Chrome debugging for tracing Responsify events.
-
 #### namespace
 
 Type: `String` Default: **responsify**
@@ -130,15 +113,9 @@ The namespace to use for `data-attribute` prefix.
 
 #### selector
 
-Type: `String` Default: **responsify**
+Type: `String` Default: **img.responsive,div.responsive**
 
-The query selector to use when searching for images to process.
-
-#### dynamicWidth
-
-Type: `Boolean` Default: **true**
-
-Whether or not to add dynamic width calculator to images.
+The query selector to use when searching for images or background divs to process.
 
 #### breakpoints
 

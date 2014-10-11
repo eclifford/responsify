@@ -72,6 +72,11 @@ module.exports = function(grunt) {
         push: false,
         commitFiles: ['-a']
       }
+    },
+    changelog: {
+      default: {
+        options: {}
+      }
     }
   });
 
@@ -82,6 +87,14 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-text-replace');
   grunt.loadNpmTasks('grunt-bump');
 
-  grunt.registerTask('build', ['jshint', 'bump', 'replace', 'uglify']);
-
+  grunt.registerTask('release', 'Build and release plugin', function(type) {
+    grunt.task.run([
+      "jshint",
+      "bump-only:" + type || "patch",
+      "replace",
+      "uglify",
+      "changelog",
+      "bump-commit"
+    ]);
+  });
 };

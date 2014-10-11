@@ -1,24 +1,38 @@
 {
   "name": "responsify",
-  "main": "responsify.js",
   "description": "Responsify is a src-N based responsive image solution intended to be used with parameter based responsive image services such as Adobe Scene7",
+  "homepage": "http://github.com/eclifford/responsify",
+  "main": "responsify.js",
   "version": "0.0.8",
-  "homepage": "https://github.com/eclifford/responsify",
-  "authors": [
-    "eclifford <ericgclifford@gmail.com>"
+  "keywords": [
+    "responsive",
+    "scene7",
+    "images",
+    "cq",
+    "aem"
   ],
+  "author": {
+    "name": "Eric Clifford",
+    "email": "ericgclifford@gmail.com"
+  },
   "license": "MIT",
   "ignore": [
     "**/.*",
     "node_modules",
     "bower_components",
-    "test"
+    "test",
+    ".travis.yml",
+    ".coveralls.yml",
+    "package.json",
+    "Gruntfile.js",
+    ".gitignore",
+    "demo.html"
   ],
+  "dependencies": {
+  },
   "devDependencies": {
     "bootstrap": "~3.2.0",
     "jquery": "~2.1.1",
     "logr.js": "~0.1.0"
-  },
-  "dependencies": {
   }
 }

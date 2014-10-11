@@ -3,6 +3,17 @@ describe("responsify", function() {
   before(function() {
     $(document.body).append("<div id='fixture'></div>");
   });
+  beforeEach(function(done) {
+    $('#fixture').load('base/test/fixtures/images.html', function() {
+      Responsify.refreshImages();
+      done();
+    });
+    Responsify.currentBreakpoint = Responsify.options.breakpoints[0];
+  });
+  afterEach(function() {
+    $('#fixture').empty();
+  });
+
   describe("init()", function() {
     var mock;
     before(function() {
@@ -18,8 +29,7 @@ describe("responsify", function() {
       mock.expects("renderImages").once();
 
       Responsify.init({
-        selector: 'img.res',
-        debounchDelay: 200
+        selector: 'img.res'
       });
 
       mock.verify();
@@ -27,8 +37,8 @@ describe("responsify", function() {
   });
 
   describe("setupEvents()", function() {
-    var clock;
-    var stub;
+    var clock, stub;
+
     before(function() {
       Responsify.setupEvents();
       clock = sinon.useFakeTimers();
@@ -49,6 +59,14 @@ describe("responsify", function() {
   });
 
   describe("getClosestSupportedWidth()", function() {
+    it("should throw on invalid parameters", function() {
+      expect(function() {
+        Responsify.getClosestSupportedWidth('a');
+      }).to.throw;
+      expect(function() {
+        Responsify.getClosestSupportedWidth();
+      }).to.throw;
+    });
     it("should calculate closest supported width if supportedWidths is set", function() {
       Responsify.options.supportedWidths = [100, 500, 1000];
       var width = Responsify.getClosestSupportedWidth(777);
@@ -62,15 +80,6 @@ describe("responsify", function() {
   });
 
   describe("renderImages()", function() {
-    before(function(done) {
-      $('#fixture').load('base/test/fixtures/images.html', function() {
-        done();
-      });
-      Responsify.currentBreakpoint = Responsify.options.breakpoints[0];
-    });
-    after(function() {
-      $('#fixture').empty();
-    });
     it("should call renderImage on all images", function() {
       var stub = sinon.stub(Responsify, "renderImage");
       var imgs = document.getElementsByClassName('responsive');
@@ -81,18 +90,9 @@ describe("responsify", function() {
   });
 
   describe("renderImage()", function() {
-    before(function(done) {
-      $('#fixture').load('base/test/fixtures/images.html', function() {
-        done();
-      });
-      Responsify.currentBreakpoint = Responsify.options.breakpoints[0];
-    });
     it("should process the image and assume it is on screen", function() {
       var img = document.getElementById('a');
       Responsify.renderImage(img);
-    });
-    after(function() {
-      $('#fixture').empty();
     });
   });
 
@@ -180,30 +180,18 @@ describe("responsify", function() {
   });
 
   describe("addImage()", function() {
-    before(function() {
-      Responsify.images = [];
-    });
-
     it("should process image and store", function() {
       var stub = sinon.stub(Responsify, "renderImage");
       var img = new Image(1,1);
       Responsify.addImage(img);
       expect(stub).to.have.been.called;
-      expect(Responsify.images.length).to.equal(1);
+      expect(Responsify.images.length).to.equal(3);
       stub.restore();
+      Responsify.removeImage(img);
     });
   });
 
   describe("removeImage()", function() {
-    beforeEach(function(done) {
-      $('#fixture').load('base/test/fixtures/images.html', function() {
-        Responsify.refreshImages();
-        done();
-      });
-    });
-    afterEach(function() {
-      $('#fixture').empty();
-    });
     it("should remove an image properly", function() {
       $img = $('img#a')[0];
       expect(Responsify.images.length).to.equal(2);
@@ -213,15 +201,6 @@ describe("responsify", function() {
   });
 
   describe("removeImages", function() {
-    beforeEach(function(done) {
-      $('#fixture').load('base/test/fixtures/images.html', function() {
-        Responsify.refreshImages();
-        done();
-      });
-    });
-    afterEach(function() {
-      $('#fixture').empty();
-    });
     it("should call removeImage on all items in the images array", function() {
       var stub = sinon.stub(Responsify, "removeImage");
       var imgs = document.getElementsByClassName('responsive');

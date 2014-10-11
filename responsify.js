@@ -85,17 +85,6 @@
       this.renderImages(this.images);
     },
     /**
-     * Find all images on the DOM that match selector and store them
-     *
-     * @example
-     *     Responsify.refreshImages()
-     *
-     * @api public
-     */
-    refreshImages: function() {
-      this.images = [].slice.call(document.querySelectorAll(this.options.selector));
-    },
-    /**
      * Setup event handlers for Responsify lifecycle
      *
      * @example
@@ -112,6 +101,17 @@
       });
     },
     /**
+     * Find all images on the DOM that match selector and store them
+     *
+     * @example
+     *     Responsify.refreshImages()
+     *
+     * @api public
+     */
+    refreshImages: function() {
+      this.images = [].slice.call(document.querySelectorAll(this.options.selector));
+    },
+    /**
      * Upon resize test for breakpoint change and re-render images
      *
      * @example
@@ -124,7 +124,7 @@
       var breakpoint = null;
 
       if (isNaN(width))
-        throw Error("Responsify.onResizeEvent(): expects number");
+        throw Error("Responsify.onResizeEvent(): expects parameter width of type Number");
 
       breakpoint = this.findClosestBreakpoint(width);
       if (breakpoint != this.currentBreakpoint) {
@@ -143,7 +143,7 @@
      */
     setBreakpoint: function(breakpoint) {
       if (!breakpoint && typeof breakpoint !== 'object')
-        throw new Error("Responsify.setBreakpoint(): expects breakpoint object to set");
+        throw new Error("Responsify.setBreakpoint(): expects parameter breakpoint of type Object");
 
       this.currentBreakpoint = breakpoint;
       this.publish('responsify:breakpoint:change', this.currentBreakpoint);
