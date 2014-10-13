@@ -4,7 +4,7 @@ module.exports = function(grunt) {
     uglify: {
       options: {
         banner: '/*! <%= pkg.name %> - v<%= pkg.version %> - ' +
-          '<%= pkg.authors[0] %> - <%= grunt.template.today("yyyy-mm-dd") %> */'
+          '<%= pkg.author %> - <%= grunt.template.today("yyyy-mm-dd") %> */'
       },
       dist: {
         files: {
@@ -67,9 +67,9 @@ module.exports = function(grunt) {
       options: {
         files: ['package.json', 'bower.json'],
         updateConfigs: ['pkg'],
-        commit: false,
-        createTag: false,
-        push: false,
+        commit: true,
+        createTag: true,
+        push: true,
         commitFiles: ['-a']
       }
     },
@@ -86,6 +86,7 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-uglify');
   grunt.loadNpmTasks('grunt-text-replace');
   grunt.loadNpmTasks('grunt-bump');
+  grunt.loadNpmTasks('grunt-conventional-changelog');
 
   grunt.registerTask('release', 'Build and release plugin', function(type) {
     grunt.task.run([

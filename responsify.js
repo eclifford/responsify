@@ -21,7 +21,7 @@
   'use strict';
 
   var Responsify = {
-    version: '0.0.8',
+    version: '0.1.0',
 
     // default options
     options: {
