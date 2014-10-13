@@ -58,6 +58,25 @@ describe("responsify", function() {
     });
   });
 
+  describe("onResizeEvent()", function() {
+    it("should throw on invalid parameters", function() {
+      expect(function() {
+        Responsify.onResizeEvent('a');
+      }).to.throw;
+    });
+  });
+
+  describe("isBreakpointEqualTo()", function() {
+    it("should throw on invalid parameters", function() {
+      expect(function() {
+        Responsify.isBreakpointEqualTo('a');
+      }).to.throw;
+    });
+    it("should return true if testing current breakpoint", function() {
+      expect(Responsify.isBreakpointEqualTo('break-a')).to.equal.true;
+    });
+  });
+
   describe("getClosestSupportedWidth()", function() {
     it("should throw on invalid parameters", function() {
       expect(function() {
@@ -94,6 +113,23 @@ describe("responsify", function() {
       var img = document.getElementById('a');
       Responsify.renderImage(img);
     });
+  });
+
+  describe("getClosestSupportedPixelRatio", function() {
+    it("should return closest matching ratio", function() {
+      var ratio = Responsify.getClosestSupportedPixelRatio(2);
+      expect(ratio).to.equal(2);
+
+      Responsify.options.supportedPixelDensity = [1, 1.3];
+      ratio = Responsify.getClosestSupportedPixelRatio(1.3);
+      expect(ratio).to.equal(1.3);
+      Responsify.options.supportedPixelDensity = [1, 1.3, 2];
+    });
+  });
+
+  describe("getPixelRatio", function() {
+    var ratio = Responsify.getPixelRatio();
+    expect(ratio).to.equal(1);
   });
 
   describe("buildImageURI()", function() {
@@ -191,11 +227,21 @@ describe("responsify", function() {
     });
   });
 
+  describe("addImages()", function() {
+    it("should call addImage for each image passed to it", function() {
+      var imgs = document.getElementsByClassName('responsive');
+      var stub = sinon.stub(Responsify, "addImage");
+      Responsify.addImages(imgs);
+      expect(stub).to.have.been.calledTwice;
+      stub.restore();
+    });
+  });
+
   describe("removeImage()", function() {
     it("should remove an image properly", function() {
-      $img = $('img#a')[0];
+      var img = document.getElementById('a');
       expect(Responsify.images.length).to.equal(2);
-      Responsify.removeImage($img);
+      Responsify.removeImage(img);
       expect(Responsify.images.length).to.equal(1);
     });
   });
@@ -219,13 +265,21 @@ describe("responsify", function() {
     });
   });
 
-  describe.skip("off()", function() {
+  describe("off()", function() {
+    it("should throw on invalid parameters", function() {
+      expect(function() {
+        Responsify.off();
+      }).to.throw;
+      expect(function() {
+        Responsify.off('topic');
+      }).to.throw;
+    });
     it("should no longer listen for events on unsubscribed topics", function() {
-      var spy = sinon.spy();
-      Responsify.on('foo', spy);
-      Responsify.off('foo', spy);
-      Responsify.publish('foo');
-      expect(spy).to.not.have.been.called;
+      var bar = function() {};
+      Responsify.on('bar', bar);
+      expect(Responsify.events.bar.length).to.equal(1);
+      Responsify.off('bar', bar);
+      expect(Responsify.events.bar.length).to.equal(0);
     });
   });
 });

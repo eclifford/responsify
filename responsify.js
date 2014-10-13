@@ -142,7 +142,7 @@
      * @api public
      */
     setBreakpoint: function(breakpoint) {
-      if (!breakpoint && typeof breakpoint !== 'object')
+      if (typeof breakpoint !== 'object')
         throw new Error("Responsify.setBreakpoint(): expects parameter breakpoint of type Object");
 
       this.currentBreakpoint = breakpoint;
@@ -282,7 +282,7 @@
           closestWidth = 0;
 
       if (isNaN(width))
-        throw new Error("Responsify.getClosestSupportedWidth(): expects width parameter to exist and be a number");
+        throw new Error("Responsify.getClosestSupportedWidth(): expects parameter width of type Number");
 
       if (i === 0)
         return width;
@@ -321,7 +321,7 @@
           closestRatio = 1;
 
       if (isNaN(ratio))
-        throw new Error("Responsify.getClosestSupportedPixelRatio(): expects parameter ratio to exist and be a number");
+        throw new Error("Responsify.getClosestSupportedPixelRatio(): expects parameter ratio of type Number");
 
       while (i--) {
         if (ratio <= this.options.supportedPixelDensity[i])
@@ -345,10 +345,10 @@
           obj = {};
 
       if (typeof baseURI !== 'string')
-        throw new Error("Responsify.buildImageURI(): expects parameter baseURI to exist and be of type string");
+        throw new Error("Responsify.buildImageURI(): expects parameter baseURI of type String");
 
       if (typeof breakpointURI !== 'string')
-        throw new Error("Responsify.buildImageURI(): expects parameter breakpointURI to exist and be of type string");
+        throw new Error("Responsify.buildImageURI(): expects parameter breakpointURI of type String");
 
       // querystring or path + querystring
       if (breakpointURI.indexOf('?') !== -1) {
@@ -380,7 +380,7 @@
       var seperator;
 
       if (typeof uri !== 'string')
-        throw new Error("Responsify.appendQueryString(): expects parameter uri to exist and be of type string");
+        throw new Error("Responsify.appendQueryString(): expects parameter uri of type String");
 
       if (!query)
         return uri;
@@ -400,7 +400,7 @@
      */
     addImage: function(img) {
       if (!(img && img instanceof HTMLElement))
-        throw new Error("Responsify.addImage(): expects parameter img to exist and be of type HTMLElement");
+        throw new Error("Responsify.addImage(): expects parameter img of type HTMLElement");
 
       this.images.push(img);
       this.renderImage(img);
@@ -415,8 +415,8 @@
      * @api public
      */
     addImages: function(imgs) {
-      if (!(imgs && imgs instanceof HTMLElement))
-        throw new Error("Responsify.removeImages(): expects parameter img to exist and be an HTMLElement");
+      if (toString.call(imgs) !== "[object NodeList]")
+        throw new Error("Responsify.addImages(): expects parameter imgs of type NodeList");
 
       for(var i = 0; i < imgs.length; i++) {
         this.addImage(imgs[i]);
@@ -433,7 +433,7 @@
      */
     removeImage: function(img) {
       if (!(img && img instanceof HTMLElement))
-        throw new Error("Responsify.removeImages(): expects parameter img to exist and be an HTMLElement");
+        throw new Error("Responsify.removeImages(): expects parameter img of type HTMLElement");
 
       var i = this.images.length;
       while (i--) {
@@ -453,7 +453,7 @@
      */
     removeImages: function(imgs) {
       if (toString.call(imgs) !== "[object NodeList]")
-        throw new Error("Responsify.removeImages(): expects parameter imgs to exist and be an array");
+        throw new Error("Responsify.removeImages(): expects parameter imgs of type NodeList");
 
       for (var i = 0; i < imgs.length; i++) {
         this.removeImage(imgs[i]);
@@ -472,7 +472,7 @@
       var subs, len;
 
       if (typeof topic !== 'string')
-        throw new Error("Responsify.publish(): expects parameter topic to exist and be type string");
+        throw new Error("Responsify.publish(): expects parameter topic of type String");
 
       subs = this.events[topic];
       len = subs ? subs.length : 0;
@@ -496,10 +496,10 @@
      */
     on: function(topic, handler, context) {
       if (typeof topic !== 'string')
-        throw new Error("Responsify.on(): expects parameter topic to exist and be type string");
+        throw new Error("Responsify.on(): expects parameter topic of type String");
 
       if (typeof handler !== 'function')
-        throw new Error("Responsify.on(): expects parameter handler to exist and be type function");
+        throw new Error("Responsify.on(): expects parameter handler to of type Function");
 
       if (!this.events[topic]) {
         this.events[topic] = [];
@@ -525,16 +525,16 @@
       var i = 0;
 
       if (typeof topic !== 'string')
-        throw new Error("Responsify.off(): expects parameter topic to exist and be type string");
+        throw new Error("Responsify.off(): expects parameter topic of type String");
 
       if (typeof handler !== 'function')
-        throw new Error("Responsify.off(): expects parameter handler to exist and be type function");
+        throw new TypeError("Responsify.off(): expects parameter handler of type Function");
 
       if (this.events[topic]) {
         i = this.events[topic].length;
 
         while (i--) {
-          if (!handler || this.events[topic][i].callback === handler) {
+          if (!handler || this.events[topic][i].handler === handler) {
             this.events[topic].splice(i, 1);
           }
         }
@@ -555,10 +555,10 @@
      */
     extend: function(destination, source) {
       if (typeof destination !== 'object')
-        throw new Error("Responsify.extend(): expects destination paramter to exist and be an object");
+        throw new Error("Responsify.extend(): expects parameter destination of type Object");
 
       if (typeof source !== 'object')
-        throw new Error("Responsify.extend(): expects source paramter to exist and be an object");
+        throw new Error("Responsify.extend(): expects parameter source of type Object");
 
       // copy over all properties from source object to destination object
       for (var prop in source) {

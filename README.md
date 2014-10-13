@@ -18,8 +18,7 @@ Responsify was born out of the need for a **Scene7** based responsive solution f
 application. We needed something that was **fast**, **non blocking**, **standalone** and relied on **convention over declaration**.
 
 In the end we created a solution that should work not only for **Scene7** but for any **src-N** based
-responsive image solution. The future may be **PictureFill** and **srcset** but the verbose non dynamic
-markup is a non starter for us.
+responsive image solution.
 
 ## Quick Start
 
