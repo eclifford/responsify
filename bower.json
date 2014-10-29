@@ -3,7 +3,7 @@
   "description": "Responsify is a src-N based responsive image solution intended to be used with parameter based responsive image services such as Adobe Scene7",
   "homepage": "http://github.com/eclifford/responsify",
   "main": "responsify.js",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "keywords": [
     "responsive",
     "scene7",
