@@ -7,6 +7,7 @@
  * Date: 10.10.2014
  *
  */
+
 (function(root, factory) {
   if (typeof define === 'function' && define.amd) {
     define([], function() {
@@ -350,8 +351,12 @@
       if (typeof breakpointURI !== 'string')
         throw new Error("Responsify.buildImageURI(): expects parameter breakpointURI of type String");
 
+      // if breakpoint is full url just return it
+      if (breakpointURI.match(/(http|https)/g)) {
+        return breakpointURI;
+      }
       // querystring or path + querystring
-      if (breakpointURI.indexOf('?') !== -1) {
+      else if (breakpointURI.indexOf('?') !== -1) {
         obj = breakpointURI.split('?');
         uri = this.appendQueryString(baseURI + obj[0], obj[1]);
       }
@@ -415,7 +420,7 @@
      * @api public
      */
     addImages: function(imgs) {
-      if (toString.call(imgs) !== "[object NodeList]")
+      if (Object.prototype.toString.call(imgs) !== "[object NodeList]")
         throw new Error("Responsify.addImages(): expects parameter imgs of type NodeList");
 
       for(var i = 0; i < imgs.length; i++) {
@@ -452,7 +457,7 @@
      * @api public
      */
     removeImages: function(imgs) {
-      if (toString.call(imgs) !== "[object NodeList]")
+      if (Object.prototype.toString.call(imgs) !== "[object NodeList]")
         throw new Error("Responsify.removeImages(): expects parameter imgs of type NodeList");
 
       for (var i = 0; i < imgs.length; i++) {
