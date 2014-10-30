@@ -49,9 +49,7 @@
           enter: 1200,
           exit: 10000
         }
-      ],
-      supportedWidths: [],        // only use if you have limited widths you can support
-      supportedPixelDensity: [1, 1.3, 2]
+      ]
     },
 
     currentBreakpoint: null,
@@ -59,6 +57,8 @@
     images: [],
 
     events: {},
+
+    interpolations: {},
 
     /**
      * Initialize Responsify
@@ -73,17 +73,36 @@
       // extend responsify options with passed in configuration
       if (config) this.extend(this.options, config);
 
+      // setup our default interpolations
+      this.setupDefaultInterpolations();
+
       // get the current breakpoint
       this.currentBreakpoint = this.findClosestBreakpoint(window.innerWidth);
 
       // find and store all responsive images
-      this.refreshImages();
+      this.resetImages();
 
       // register all events
       this.setupEvents();
 
       // process all images currently in DOM
       this.renderImages(this.images);
+    },
+    /**
+     * Setup our default string interpolation methods
+     *
+     * @example
+     *     Responsify.setupDefaultInterpolations()
+     *
+     * @api public
+     */
+    setupDefaultInterpolations: function() {
+      this.interpolations['width'] = function(el) {
+        return el.parentElement.clientWidth;
+      };
+      this.interpolations['landscape'] = function(el) {
+        return Math.ceil(el.parentElement.clientWidth * 0.5625);
+      };
     },
     /**
      * Setup event handlers for Responsify lifecycle
@@ -100,9 +119,22 @@
           self.onResizeEvent(window.innerWidth);
         });
       });
+
+      // for any added/removed mutation we reset/refresh
+      var observer = new MutationObserver(function(mutations) {
+        window.requestAnimationFrame(function() {
+          self.resetImages();
+          self.refreshImages();
+        });
+      });
+
+      observer.observe(document.body, {
+        childList: true,
+        subtree: true
+      });
     },
     /**
-     * Find all images on the DOM that match selector and store them
+     * Rerender all images currently stored
      *
      * @example
      *     Responsify.refreshImages()
@@ -110,7 +142,18 @@
      * @api public
      */
     refreshImages: function() {
-      this.images = [].slice.call(document.querySelectorAll(this.options.selector));
+      this.renderImages(this.images);
+    },
+    /**
+     * Find all images on the DOM that match selector and store them
+     *
+     * @example
+     *     Responsify.resetImages()
+     *
+     * @api public
+     */
+    resetImages: function() {
+      this.images = [].slice.call(document.body.querySelectorAll(this.options.selector));
     },
     /**
      * Upon resize test for breakpoint change and re-render images
@@ -199,7 +242,7 @@
       if (!(el && el instanceof HTMLElement))
         throw new Error("Responsify.isElementVisible(): expects parameter el of type HTMLElement");
 
-      return el.parentElement.offsetWidth > 0 && el.parentElement.offsetHeight > 0;
+      return !!el.offsetParent;
     },
     /**
      * Render an Array or NodeList of images that are visible
@@ -215,8 +258,7 @@
         throw new Error("Responsify.renderImages(): expects parameter images of type Array or NodeList");
 
       for (var i = 0; i < images.length; i++) {
-        if (this.isElementVisible(images[i]))
-          this.renderImage(images[i]);
+        this.renderImage(images[i]);
       }
     },
     /**
@@ -241,6 +283,9 @@
       if (!(el && el instanceof HTMLElement))
         throw new Error("Responsify.renderImage(): expects parameter el of type HTMLElement");
 
+      if (!this.isElementVisible(el))
+        return false;
+
       // read in base URI and current breakpoint URI from data attributes
       baseURI = el.getAttribute('data-' + this.options.namespace) || "";
       breakpointURI = el.getAttribute("data-" + this.options.namespace + "-" + this.currentBreakpoint.label) || "";
@@ -248,17 +293,12 @@
       // combine baseURI and breakpoint data
       imageURI = this.buildImageURI(baseURI, breakpointURI);
 
-      // dynamically calculate width
-      if (imageURI.match(/{width}/g)) {
-        baseWidth = this.getClosestSupportedWidth(el.parentElement.clientWidth);
-        ratio = this.getClosestSupportedPixelRatio(this.getPixelRatio());
-        width = baseWidth * ratio;
-        imageURI = imageURI.replace(/{width}/g, width);
-      }
+      // interpolate string running it through all interpolation methods to create dynamic values
+      imageURI = this.getURLInterpolationsForElement(imageURI, el);
 
       // render image or background image div
-      if(el.nodeName.toLowerCase() === 'img') {
-        if(el.src !== imageURI)
+      if (el.nodeName.toLowerCase() === 'img') {
+        if (el.src !== imageURI)
           el.src = imageURI;
       } else {
         el.style.backgroundImage = "url('" + imageURI + "')";
@@ -269,66 +309,29 @@
       this.publish('responsify:image:rendered', el);
     },
     /**
-     * Find closest supported matching width
+     * Interpolate all placeholders by applying interpolation function
+     * on el
      *
      * @example
-     *     Responsify.getClosestSupportedWidth(120)
+     *     Responsify.getURLInterpolationsForElement(
+     *       'http://http://s7d9.scene7.com/is/image/DEMOAKQA/1440.1?wid={width}',
+     *       <HTMLElement>
+     *     )
      *
-     * @param {Number} width the width to test
-     * @return {Number} the closest supported width
+     * @param {String} url the url to interpolate
+     * @param {HTMLElement} el to pass to interpolation method
      * @api public
      */
-    getClosestSupportedWidth: function(width) {
-      var i = this.options.supportedWidths.length,
-          closestWidth = 0;
+    getURLInterpolationsForElement: function(url, el) {
+      var re = /{([^%}]+)?}/g,
+          match = null;
 
-      if (isNaN(width))
-        throw new Error("Responsify.getClosestSupportedWidth(): expects parameter width of type Number");
-
-      if (i === 0)
-        return width;
-
-      while (i--) {
-        if(width <= this.options.supportedWidths[i]) {
-          closestWidth = this.options.supportedWidths[i];
-        }
+      // for each match replace placeholder with interpolated value
+      while ((match = re.exec(url)) !== null) {
+        url = url.replace(match[0], this.interpolations[match[1]](el));
       }
-      return closestWidth;
-    },
-    /**
-     * Query the window object for the current devices pixel ratio
-     *
-     * @example
-     *     Responsify.getPixelRatio()
-     *
-     * @return {Number} the closest supported device pixel ratio
-     * @api public
-     */
-    getPixelRatio: function() {
-      return window.devicePixelRatio || 1;
-    },
-    /**
-     * Determine closest supported pixel ratio
-     *
-     * @example
-     *     Responsify.getClosestSupportedPixelRatio(1)
-     *
-     * @param {Number} ratio the ratio to test
-     * @return {Number} the closest supported ratio
-     * @api public
-     */
-    getClosestSupportedPixelRatio: function(ratio) {
-      var i = this.options.supportedPixelDensity.length,
-          closestRatio = 1;
 
-      if (isNaN(ratio))
-        throw new Error("Responsify.getClosestSupportedPixelRatio(): expects parameter ratio of type Number");
-
-      while (i--) {
-        if (ratio <= this.options.supportedPixelDensity[i])
-          closestRatio = this.options.supportedPixelDensity[i];
-      }
-      return closestRatio;
+      return url;
     },
     /**
      * Combine baseURI with current breakpoint parameters
@@ -439,7 +442,6 @@
     removeImage: function(img) {
       if (!(img && img instanceof HTMLElement))
         throw new Error("Responsify.removeImages(): expects parameter img of type HTMLElement");
-
       var i = this.images.length;
       while (i--) {
         if (img === this.images[i]) {
@@ -580,6 +582,7 @@
 
   // polyfills
   window.requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame || function (callback) { window.setTimeout(callback, 1000 / 60); };
+  window.MutationObserver = window.MutationObserver || window.WebKitMutationObserver || window.MozMutationObserver;
 
   return Responsify;
 }));
