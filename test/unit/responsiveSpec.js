@@ -5,7 +5,7 @@ describe("responsify", function() {
   });
   beforeEach(function(done) {
     $('#fixture').load('base/test/fixtures/images.html', function() {
-      Responsify.refreshImages();
+      Responsify.resetImages();
       done();
     });
     Responsify.currentBreakpoint = Responsify.options.breakpoints[0];
@@ -36,6 +36,19 @@ describe("responsify", function() {
     });
   });
 
+  describe("setupDefaultInterpolations()", function() {
+    it("should calculate {width} properly", function() {
+      var img = document.getElementById('a');
+      var width = Responsify.interpolations.width(img);
+      expect(width).to.equal(500);
+    });
+    it("should calculate {landscape} properly", function() {
+      var img = document.getElementById('a');
+      var width = Responsify.interpolations.landscape(img);
+      expect(width).to.equal(282);
+    });
+  });
+
   describe("setupEvents()", function() {
     var clock, stub;
 
@@ -59,80 +72,129 @@ describe("responsify", function() {
   });
 
   describe("onResizeEvent()", function() {
+    beforeEach(function() {
+      // set breakpoint to A
+      Responsify.currentBreakpoint = Responsify.options.breakpoints[0];
+    });
+
     it("should throw on invalid parameters", function() {
       expect(function() {
         Responsify.onResizeEvent('a');
-      }).to.throw;
+      }).to.throw();
+    });
+
+    it("should emit a breakpoint:change event upon breakpoint change", function() {
+      var spy = sinon.spy();
+      Responsify.on('responsify:breakpoint:change', spy);
+      Responsify.onResizeEvent(1200);
+      expect(spy).to.have.been.called;
+    });
+
+    it("should not emit an event if breakpoint does not change", function() {
+      var spy = sinon.spy();
+      Responsify.on('responsify:breakpoint:change', spy);
+      Responsify.onResizeEvent(0);
+      expect(spy).not.to.have.been.called;
+    });
+  });
+
+  describe("setBreakpoint()", function() {
+    it("should throw on invalid parameters", function() {
+      expect(function() {
+        Responsify.setBreakpoint();
+      }).to.throw();
+    });
+  });
+
+  describe("findClosestBreakpoint()", function() {
+    it("should throw on invalid parameters", function() {
+      expect(function() {
+        Responsify.findClosestBreakpoint('a');
+      }).to.throw();
+    });
+
+    it("should be able to determine appropriate breakpoint based on provided width", function() {
+      var breakpoint = Responsify.findClosestBreakpoint(0);
+      expect(breakpoint.label).to.equal('break-a');
+
+      breakpoint = Responsify.findClosestBreakpoint(771);
+      expect(breakpoint.label).to.equal('break-b');
+
+      breakpoint = Responsify.findClosestBreakpoint(1170);
+      expect(breakpoint.label).to.equal('break-c');
     });
   });
 
   describe("isBreakpointEqualTo()", function() {
     it("should throw on invalid parameters", function() {
       expect(function() {
-        Responsify.isBreakpointEqualTo('a');
-      }).to.throw;
+        Responsify.isBreakpointEqualTo(1);
+      }).to.throw();
     });
     it("should return true if testing current breakpoint", function() {
       expect(Responsify.isBreakpointEqualTo('break-a')).to.equal.true;
     });
   });
 
-  describe("getClosestSupportedWidth()", function() {
+  describe("isElementVisible()", function() {
     it("should throw on invalid parameters", function() {
       expect(function() {
-        Responsify.getClosestSupportedWidth('a');
-      }).to.throw;
-      expect(function() {
-        Responsify.getClosestSupportedWidth();
-      }).to.throw;
-    });
-    it("should calculate closest supported width if supportedWidths is set", function() {
-      Responsify.options.supportedWidths = [100, 500, 1000];
-      var width = Responsify.getClosestSupportedWidth(777);
-      expect(width).to.equal(1000);
-    });
-    it("should return provided width if no explicit supportedWidths are set", function() {
-      Responsify.options.supportedWidths = [];
-      var width = Responsify.getClosestSupportedWidth(777);
-      expect(width).to.equal(777);
+        Responsify.isElementVisible();
+      }).to.throw();
     });
   });
 
   describe("renderImages()", function() {
+    it("should throw on invalid parameters", function() {
+      expect(function() {
+        Responsify.renderImages();
+      }).to.throw();
+    });
     it("should call renderImage on all images", function() {
       var stub = sinon.stub(Responsify, "renderImage");
       var imgs = document.getElementsByClassName('responsive');
       Responsify.renderImages(imgs);
-      expect(stub).to.have.been.calledTwice;
+      expect(stub).to.have.been.calledThrice;
       stub.restore();
     });
   });
 
   describe("renderImage()", function() {
-    it("should process the image and assume it is on screen", function() {
+    it("should throw on invalid parameters", function() {
+      expect(function() {
+        Responsify.renderImage({});
+      }).to.throw();
+    });
+
+    it("should render an image that is visible", function() {
       var img = document.getElementById('a');
       Responsify.renderImage(img);
     });
-  });
 
-  describe("getClosestSupportedPixelRatio", function() {
-    it("should return closest matching ratio", function() {
-      var ratio = Responsify.getClosestSupportedPixelRatio(2);
-      expect(ratio).to.equal(2);
-
-      Responsify.options.supportedPixelDensity = [1, 1.3];
-      ratio = Responsify.getClosestSupportedPixelRatio(1.3);
-      expect(ratio).to.equal(1.3);
-      Responsify.options.supportedPixelDensity = [1, 1.3, 2];
+    it("should not render an invisible image", function() {
+      var img = document.getElementById('c');
+      var rendered = Responsify.renderImage(img);
+      expect(rendered).to.equal(false);
     });
   });
 
-  describe("getPixelRatio", function() {
-    var ratio = Responsify.getPixelRatio();
-    expect(ratio).to.equal(1);
+  describe("getURLInterpolationsForElement()", function() {
+    it("should interpolate {width} correctly on given url", function() {
+      var img = document.getElementById('a');
+      var result = Responsify.getURLInterpolationsForElement('http://s7d9.scene7.com/is/image/DEMOAKQA/1440.1?resMode=sharp2&qlt=85&wid={width}', img);
+      expect(result).to.equal('http://s7d9.scene7.com/is/image/DEMOAKQA/1440.1?resMode=sharp2&qlt=85&wid=500');
+    });
   });
 
   describe("buildImageURI()", function() {
+    it("should throw on invalid parameters", function() {
+      expect(function() {
+        Responsify.buildImageURI();
+      }).to.throw();
+      expect(function() {
+        Responsify.buildImageURI('http://www.test.com');
+      }).to.throw();
+    });
     it("should properly combine two paths", function() {
       var url = Responsify.buildImageURI("http://www.test.com/", "foo.jpg");
       expect(url).to.equal("http://www.test.com/foo.jpg");
@@ -159,104 +221,102 @@ describe("responsify", function() {
       var url = Responsify.buildImageURI("http://www.test.com/foo.jpg", "");
       expect(url).to.equal("http://www.test.com/foo.jpg");
     });
-  });
-
-  describe("findClosestBreakpoint()", function() {
-    it("should be able to determine appropriate breakpoint based on provided width", function() {
-      var breakpoint = Responsify.findClosestBreakpoint(0);
-      expect(breakpoint.label).to.equal('break-a');
-
-      breakpoint = Responsify.findClosestBreakpoint(771);
-      expect(breakpoint.label).to.equal('break-b');
-
-      breakpoint = Responsify.findClosestBreakpoint(1170);
-      expect(breakpoint.label).to.equal('break-c');
+    it("should return just the breakpoint URL if breakpoint URL is full path", function(){
+      var url = Responsify.buildImageURI("http://www.test.com/foo.jpg", "http://www.test.com/baz.jpg");
+      expect(url).to.equal("http://www.test.com/baz.jpg");
     });
   });
 
-  describe("onResizeEvent()", function() {
-    beforeEach(function() {
-      // set breakpoint to A
-      Responsify.currentBreakpoint = Responsify.options.breakpoints[0];
+  describe("appendQueryString()", function() {
+    it("should throw on invalid parameters", function() {
+      expect(function() {
+        Responsify.appendQueryString();
+      }).to.throw();
     });
-
-    it("should emit a breakpoint:change event upon breakpoint change", function() {
-      var spy = sinon.spy();
-      Responsify.on('responsify:breakpoint:change', spy);
-      Responsify.onResizeEvent(1200);
-      expect(spy).to.have.been.called;
-    });
-
-    it("should not emit an event if breakpoint does not change", function() {
-      var spy = sinon.spy();
-      Responsify.on('responsify:breakpoint:change', spy);
-      Responsify.onResizeEvent(0);
-      expect(spy).not.to.have.been.called;
-    });
-  });
-
-  describe("extend()", function() {
-    it("should be able to extend target object with source object", function() {
-      var obj = Responsify.extend({ foo: 'baz'}, { bar: 'quz'});
-      expect(obj).to.deep.equal({
-        foo: 'baz',
-        bar: 'quz'
-      });
-    });
-
-    it("it should deep extend", function() {
-      var obj = Responsify.extend({ foo: { baz: 'bar' }}, { foo: { baz: 'far', quz: 'foo'}});
-      expect(obj).to.deep.equal({
-        foo: {
-          baz: 'far',
-          quz: 'foo'
-        }
-      });
+    it("should return just the URI if no queryString present", function() {
+      var uri = Responsify.appendQueryString('http://www.test.com');
+      expect(uri).to.equal('http://www.test.com');
     });
   });
 
   describe("addImage()", function() {
+    it("should throw on invalid paramters", function() {
+      expect(function() {
+        Responsify.addImage();
+      }).to.throw();
+    });
     it("should process image and store", function() {
       var stub = sinon.stub(Responsify, "renderImage");
       var img = new Image(1,1);
       Responsify.addImage(img);
       expect(stub).to.have.been.called;
-      expect(Responsify.images.length).to.equal(3);
+      expect(Responsify.images.length).to.equal(4);
       stub.restore();
       Responsify.removeImage(img);
     });
   });
 
   describe("addImages()", function() {
+    it("should throw on invalid parameters", function() {
+      expect(function() {
+        Responsify.addImages();
+      }).to.throw();
+    });
     it("should call addImage for each image passed to it", function() {
       var imgs = document.getElementsByClassName('responsive');
       var stub = sinon.stub(Responsify, "addImage");
       Responsify.addImages(imgs);
-      expect(stub).to.have.been.calledTwice;
+      expect(stub).to.have.been.calledThrice;
       stub.restore();
     });
   });
 
   describe("removeImage()", function() {
+    it("should throw on invalid parameters", function() {
+      expect(function() {
+        Responsify.removeImage();
+      }).to.throw();
+    });
     it("should remove an image properly", function() {
       var img = document.getElementById('a');
-      expect(Responsify.images.length).to.equal(2);
+      expect(Responsify.images.length).to.equal(3);
       Responsify.removeImage(img);
-      expect(Responsify.images.length).to.equal(1);
+      expect(Responsify.images.length).to.equal(2);
     });
   });
 
-  describe("removeImages", function() {
+  describe("removeImages()", function() {
+    it("should throw on invalid parameters", function() {
+      expect(function() {
+        Responsify.removeImages();
+      }).to.throw();
+    });
     it("should call removeImage on all items in the images array", function() {
       var stub = sinon.stub(Responsify, "removeImage");
       var imgs = document.getElementsByClassName('responsive');
       Responsify.removeImages(imgs);
-      expect(stub).to.have.been.calledTwice;
+      expect(stub).to.have.been.calledThrice;
       stub.restore();
     });
   });
 
+  describe("publish()", function() {
+    it("should throw on invalid parameters", function() {
+      expect(function() {
+        Responsify.publish();
+      }).to.throw();
+    });
+  });
+
   describe("on()", function() {
+    it("should throw on invalid parameters", function() {
+      expect(function() {
+        Responsify.on();
+      }).to.throw();
+      expect(function() {
+        Responsify.on('topic');
+      }).to.throw();
+    });
     it("should call appropriate callback", function() {
       var spy = sinon.spy();
       Responsify.on('foo', spy);
@@ -269,10 +329,10 @@ describe("responsify", function() {
     it("should throw on invalid parameters", function() {
       expect(function() {
         Responsify.off();
-      }).to.throw;
+      }).to.throw();
       expect(function() {
         Responsify.off('topic');
-      }).to.throw;
+      }).to.throw();
     });
     it("should no longer listen for events on unsubscribed topics", function() {
       var bar = function() {};
@@ -280,6 +340,33 @@ describe("responsify", function() {
       expect(Responsify.events.bar.length).to.equal(1);
       Responsify.off('bar', bar);
       expect(Responsify.events.bar.length).to.equal(0);
+    });
+  });
+
+  describe("extend()", function() {
+    it("should throw on invalid parameters", function() {
+      expect(function() {
+        Responsify.extend();
+      }).to.throw();
+      expect(function() {
+        Responsify.extend({});
+      }).to.throw();
+    });
+    it("should be able to extend target object with source object", function() {
+      var obj = Responsify.extend({ foo: 'baz'}, { bar: 'quz'});
+      expect(obj).to.deep.equal({
+        foo: 'baz',
+        bar: 'quz'
+      });
+    });
+    it("it should deep extend", function() {
+      var obj = Responsify.extend({ foo: { baz: 'bar' }}, { foo: { baz: 'far', quz: 'foo'}});
+      expect(obj).to.deep.equal({
+        foo: {
+          baz: 'far',
+          quz: 'foo'
+        }
+      });
     });
   });
 });

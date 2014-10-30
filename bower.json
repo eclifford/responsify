@@ -28,11 +28,11 @@
     ".gitignore",
     "demo.html"
   ],
-  "dependencies": {
-  },
+  "dependencies": {},
   "devDependencies": {
     "bootstrap": "~3.2.0",
     "jquery": "~2.1.1",
-    "logr.js": "~0.1.0"
+    "logr.js": "~0.1.0",
+    "MutationObserver-shim": "~0.2.8"
   }
 }
