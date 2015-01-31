@@ -1,7 +1,7 @@
 <html>
   <head>
     <title>Responsify Demo</title>
-    <script src='responsify.js' defer></script>
+    <script src='responsify.js' async></script>
     <script src='bower_components/logr.js/logr.js'></script>
     <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.css" media="screen" title="no title" charset="utf-8">
     <link href='http://fonts.googleapis.com/css?family=Carme' rel='stylesheet' type='text/css'>
@@ -24,6 +24,19 @@
         width: 100%;
         height: auto;
       }
+      .responsive {
+        max-width: 100%;
+        width: 100%;
+        height: auto;
+      }
+      img.responsive.loaded {
+        opacity: 1;
+      }
+      img.responsive {
+        opacity: 0;
+        -webkit-transition: opacity 1s ease-out;
+        transition: opacity 1s ease-out;
+      }
       .row .col-xs-6 {
         padding: 0px;
       }
@@ -41,7 +54,7 @@
       document.addEventListener("DOMContentLoaded", function() {
         var log = Logr.log('responsify');
         log.attach(Responsify);
-        Responsify.init();
+        Responsify.init({lazyload: true});
       });
     </script>
   </head>

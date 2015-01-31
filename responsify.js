@@ -28,6 +28,7 @@
     options: {
       namespace: 'responsify',
       selector: 'img.responsive,div.responsive',
+      lazyload: false,
       breakpoints: [
         {
           label: 'break-a',
@@ -70,6 +71,8 @@
      * @api public
      */
     init: function(config) {
+      var self = this;
+
       // extend responsify options with passed in configuration
       if (config) this.extend(this.options, config);
 
@@ -79,14 +82,31 @@
       // get the current breakpoint
       this.currentBreakpoint = this.findClosestBreakpoint(window.innerWidth);
 
-      // find and store all responsive images
-      this.resetImages();
-
       // register all events
       this.setupEvents();
 
-      // process all images currently in DOM
-      this.renderImages(this.images);
+      // poll dom for new images until page load
+      var intervalId = setInterval( function() {
+        self.addImages(self.getNewImages());
+
+        if ( /^loaded|^i|^c/.test( window.document.readyState ) ) {
+          clearInterval( intervalId );
+
+          // for any added/removed mutation we reset/refresh
+          var observer = new MutationObserver(function(mutations) {
+            window.requestAnimationFrame(function() {
+              self.addImages(self.getNewImages());
+            });
+          });
+
+          observer.observe(window.document.body, {
+            childList: true,
+            subtree: true
+          });
+
+          return;
+        }
+      }, 100);
     },
     /**
      * Setup our default string interpolation methods
@@ -102,6 +122,9 @@
       };
       this.interpolations['landscape'] = function(el) {
         return Math.ceil(el.parentElement.clientWidth * 0.5625);
+      };
+      this.interpolations['height'] = function(el) {
+        return el.parentElement.clientHeight;
       };
     },
     /**
@@ -120,17 +143,28 @@
         });
       });
 
-      // for any added/removed mutation we reset/refresh
-      var observer = new MutationObserver(function(mutations) {
-        window.requestAnimationFrame(function() {
-          self.resetImages();
-          self.refreshImages();
+      if (this.options.lazyload) {
+        window.addEventListener("scroll", function() {
+          window.requestAnimationFrame(function() {
+            self.refreshImages();
+          });
         });
-      });
+      }
+    },
+    /**
+     * Get all images added to DOM since last check and return them
+     *
+     * @example
+     *     Responsify.getNewImages()
+     *
+     * @api public
+     */
+    getNewImages: function() {
+      var self = this,
+          imgs = [].slice.call(window.document.querySelectorAll(this.options.selector));
 
-      observer.observe(document.body, {
-        childList: true,
-        subtree: true
+      return imgs.filter(function(el) {
+        return self.images.indexOf(el) === -1;
       });
     },
     /**
@@ -153,7 +187,7 @@
      * @api public
      */
     resetImages: function() {
-      this.images = [].slice.call(document.body.querySelectorAll(this.options.selector));
+      this.images = [].slice.call(window.document.querySelectorAll(this.options.selector));
     },
     /**
      * Upon resize test for breakpoint change and re-render images
@@ -173,7 +207,7 @@
       breakpoint = this.findClosestBreakpoint(width);
       if (breakpoint != this.currentBreakpoint) {
         this.setBreakpoint(breakpoint);
-        this.renderImages(this.images);
+        this.refreshImages();
       }
     },
     /**
@@ -234,7 +268,7 @@
      * @example
      *     Responsify.isElementVisible(<HTMLElement>)
      *
-     * @param {HTMLElement} images the images to render
+     * @param {HTMLElement} the element to test
      * @return {Boolean} whether or not the element is visible
      * @api public
      */
@@ -243,6 +277,25 @@
         throw new Error("Responsify.isElementVisible(): expects parameter el of type HTMLElement");
 
       return !!el.offsetParent;
+    },
+    /**
+     * Return whether or not element is in viewport
+     *
+     * @example
+     *     Responsify.isElementInViewport(<HTMLElement>)
+     *
+     * @param {HTMLElement} the element to test
+     * @return {Boolean} whether or not the element is in viewport
+     * @api public
+     */
+    isElementInViewport: function(el) {
+      var rect = el.getBoundingClientRect();
+      var html = document.documentElement;
+      return (
+        rect.top <= (window.innerHeight || html.clientHeight) &&
+        rect.left >= 0 &&
+        rect.right <= (window.innerWidth || html.clientWidth)
+      );
     },
     /**
      * Render an Array or NodeList of images that are visible
@@ -283,8 +336,18 @@
       if (!(el && el instanceof HTMLElement))
         throw new Error("Responsify.renderImage(): expects parameter el of type HTMLElement");
 
+      // visibility test
       if (!this.isElementVisible(el))
         return false;
+
+      // viewport test
+      if (this.options.lazyload && !this.isElementInViewport(el))
+        return false;
+
+      // downscale if image is smaller
+      if (el.naturalWidth > el.clientWidth) {
+        return false;
+      }
 
       // read in base URI and current breakpoint URI from data attributes
       baseURI = el.getAttribute('data-' + this.options.namespace) || "";
@@ -304,6 +367,8 @@
         el.style.backgroundImage = "url('" + imageURI + "')";
         el.style.backgroundSize = "cover";
       }
+
+      el.classList.add('loaded');
 
       // notify subscribers
       this.publish('responsify:image:rendered', el);
@@ -423,9 +488,6 @@
      * @api public
      */
     addImages: function(imgs) {
-      if (Object.prototype.toString.call(imgs) !== "[object NodeList]")
-        throw new Error("Responsify.addImages(): expects parameter imgs of type NodeList");
-
       for(var i = 0; i < imgs.length; i++) {
         this.addImage(imgs[i]);
       }

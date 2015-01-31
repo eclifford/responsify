@@ -3,6 +3,7 @@ describe("responsify", function() {
   before(function() {
     $(document.body).append("<div id='fixture'></div>");
   });
+
   beforeEach(function(done) {
     $('#fixture').load('base/test/fixtures/images.html', function() {
       Responsify.resetImages();
@@ -10,6 +11,7 @@ describe("responsify", function() {
     });
     Responsify.currentBreakpoint = Responsify.options.breakpoints[0];
   });
+
   afterEach(function() {
     $('#fixture').empty();
   });
@@ -26,7 +28,6 @@ describe("responsify", function() {
       mock.expects("extend").once();
       mock.expects("findClosestBreakpoint").once();
       mock.expects("setupEvents").once();
-      mock.expects("renderImages").once();
 
       Responsify.init({
         selector: 'img.res'
