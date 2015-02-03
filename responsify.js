@@ -86,7 +86,7 @@
       this.setupEvents();
 
       // poll dom for new images until page load
-      var intervalId = setInterval( function() {
+      var intervalId = setInterval( function onPreInit() {
         self.addImages(self.getNewImages());
 
         if ( /^loaded|^i|^c/.test( window.document.readyState ) ) {
@@ -94,7 +94,7 @@
 
           // for any added/removed mutation we reset/refresh
           var observer = new MutationObserver(function(mutations) {
-            window.requestAnimationFrame(function() {
+            window.requestAnimationFrame(function onMutationEvent() {
               self.addImages(self.getNewImages());
             });
           });
@@ -117,13 +117,13 @@
      * @api public
      */
     setupDefaultInterpolations: function() {
-      this.interpolations['width'] = function(el) {
+      this.interpolations.width = function(el) {
         return el.parentElement.clientWidth;
       };
-      this.interpolations['landscape'] = function(el) {
+      this.interpolations.landscape = function(el) {
         return Math.ceil(el.parentElement.clientWidth * 0.5625);
       };
-      this.interpolations['height'] = function(el) {
+      this.interpolations.height = function(el) {
         return el.parentElement.clientHeight;
       };
     },
@@ -138,7 +138,7 @@
     setupEvents: function() {
       var self = this;
       window.addEventListener("resize", function() {
-        window.requestAnimationFrame(function() {
+        window.requestAnimationFrame(function onRequestResizeEvent() {
           self.onResizeEvent(window.innerWidth);
         });
       });
@@ -344,14 +344,14 @@
       if (this.options.lazyload && !this.isElementInViewport(el))
         return false;
 
-      // downscale if image is smaller
-      if (el.naturalWidth > el.clientWidth) {
-        return false;
-      }
-
       // read in base URI and current breakpoint URI from data attributes
       baseURI = el.getAttribute('data-' + this.options.namespace) || "";
       breakpointURI = el.getAttribute("data-" + this.options.namespace + "-" + this.currentBreakpoint.label) || "";
+
+      // downscale if image is smaller and there is not a specific breakpoint
+      if (el.naturalWidth > el.clientWidth && breakpointURI !== "") {
+        return false;
+      }
 
       // combine baseURI and breakpoint data
       imageURI = this.buildImageURI(baseURI, breakpointURI);
@@ -367,8 +367,6 @@
         el.style.backgroundImage = "url('" + imageURI + "')";
         el.style.backgroundSize = "cover";
       }
-
-      el.classList.add('loaded');
 
       // notify subscribers
       this.publish('responsify:image:rendered', el);

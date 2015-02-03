@@ -34,8 +34,8 @@
       }
       img.responsive {
         opacity: 0;
-        -webkit-transition: opacity 1s ease-out;
-        transition: opacity 1s ease-out;
+        -webkit-transition: opacity 4s ease-out;
+        transition: opacity 4s ease-out;
       }
       .row .col-xs-6 {
         padding: 0px;
@@ -55,6 +55,10 @@
         var log = Logr.log('responsify');
         log.attach(Responsify);
         Responsify.init({lazyload: true});
+      });
+
+      Responsify.on('responsify:image:rendered', function(el) {
+        el.classList.add('loaded');
       });
     </script>
   </head>

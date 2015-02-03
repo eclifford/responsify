@@ -30,19 +30,17 @@ bower install responsify
 
 ### Add Responsify to DOCUMENT
 
-Responsify can be loaded in either the head or at the end of the body. Optionally
-use `defer` to have responsify executed after DOM creation.
+Responsify can be loaded anywhere in the `<head>` or `<body>` as either a blocking script or with **defer** and **async**. Responsify will poll the DOM prior to the loaded event to continually process images if using **defer** or if put at in the `<head>`.
 
 ```html
 <head>
-  <script src='bower_components/resonsify/responsify.js' defer></script>
+  <script src='bower_components/resonsify/responsify.js' async></script>
 </head>
 ```
 
 ### Initialize Responsify
 
-Responsify needs to be told when to initialize. It is important that this is done after the DOM has been rendered. In the below
-example this is done on the `DOMContentLoaded` event, but optionally this may be done in **jQuery** `onReady` event.
+Responsify needs to be told when to initialize. 
 
 
 Vanilla Face
@@ -116,6 +114,12 @@ Type: `String` Default: **img.responsive,div.responsive**
 
 The query selector to use when searching for images or background divs to process.
 
+#### lazyload
+
+Type: `Boolean` Default: **true**
+
+Whether or not to only load images that are currently visible in the viewport.
+
 #### breakpoints
 
 Type: `Array[Object]` Default: **Array of breakpoint objects**
@@ -133,10 +137,13 @@ simply use `Responsify.on`.
   });
 ```
 
-#### responsify:breakpoint:change
+#### responsify:image:rendered
 
-#### responsify:image:loaded
-
+```js
+  Responsify.on('responsify:image:rendered', function(el) {
+    // do something
+  });
+```
 
 ### Contributing
 
