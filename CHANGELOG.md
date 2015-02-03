@@ -1,3 +1,12 @@
+<a name="0.2.1"></a>
+### 0.2.1 (2015-02-03)
+
+
+#### Features
+
+* **Responsify:** adding viewport lazy loading, rendering before pageload ((671a2223))
+
+
 <a name="0.2.0"></a>
 ## 0.2.0 (2014-10-30)
 
