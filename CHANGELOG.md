@@ -1,3 +1,12 @@
+<a name="0.2.2"></a>
+### 0.2.2 (2015-02-06)
+
+
+#### Bug Fixes
+
+* **Logr:** better handling of downscaling of imgs and background divs ((cb37cbd3))
+
+
 <a name="0.2.1"></a>
 ### 0.2.1 (2015-02-03)
 
