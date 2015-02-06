@@ -97,6 +97,7 @@ describe("responsify", function() {
       Responsify.onResizeEvent(0);
       expect(spy).not.to.have.been.called;
     });
+
   });
 
   describe("setBreakpoint()", function() {
@@ -155,7 +156,7 @@ describe("responsify", function() {
       var stub = sinon.stub(Responsify, "renderImage");
       var imgs = document.getElementsByClassName('responsive');
       Responsify.renderImages(imgs);
-      expect(stub).to.have.been.calledThrice;
+      expect(stub).to.have.been.callCount(4);
       stub.restore();
     });
   });
@@ -176,6 +177,31 @@ describe("responsify", function() {
       var img = document.getElementById('c');
       var rendered = Responsify.renderImage(img);
       expect(rendered).to.equal(false);
+    });
+
+    it("should not render downscaled image", function() {
+      // render at 500px
+      var img = document.getElementById('e');
+      var rendered = Responsify.renderImage(img);
+      expect(rendered).to.equal(true);
+
+      // attempt render again at 300px
+      var container = document.getElementById('container');
+      container.style.width = "300px";
+      rendered = Responsify.renderImage(img);
+      expect(rendered).to.equal(false);
+    });
+  });
+
+  describe("isElementToBeDownscaled()", function() {
+    it("should downscale a smaller requested image", function() {
+      var img = document.getElementById('e');
+      var container = document.getElementById('container');
+      Responsify.renderImage(img); // rendered at 500px
+      container.style.width = "300px";
+
+      var downscale = Responsify.isElementToBeDownscaled(img);
+      expect(downscale).to.equal(true);
     });
   });
 
@@ -251,7 +277,7 @@ describe("responsify", function() {
       var img = new Image(1,1);
       Responsify.addImage(img);
       expect(stub).to.have.been.called;
-      expect(Responsify.images.length).to.equal(4);
+      expect(Responsify.images.length).to.equal(5);
       stub.restore();
       Responsify.removeImage(img);
     });
@@ -267,7 +293,7 @@ describe("responsify", function() {
       var imgs = document.getElementsByClassName('responsive');
       var stub = sinon.stub(Responsify, "addImage");
       Responsify.addImages(imgs);
-      expect(stub).to.have.been.calledThrice;
+      expect(stub).to.have.been.callCount(4);
       stub.restore();
     });
   });
@@ -280,9 +306,9 @@ describe("responsify", function() {
     });
     it("should remove an image properly", function() {
       var img = document.getElementById('a');
-      expect(Responsify.images.length).to.equal(3);
+      expect(Responsify.images.length).to.equal(4);
       Responsify.removeImage(img);
-      expect(Responsify.images.length).to.equal(2);
+      expect(Responsify.images.length).to.equal(3);
     });
   });
 
@@ -296,7 +322,7 @@ describe("responsify", function() {
       var stub = sinon.stub(Responsify, "removeImage");
       var imgs = document.getElementsByClassName('responsive');
       Responsify.removeImages(imgs);
-      expect(stub).to.have.been.calledThrice;
+      expect(stub).to.have.been.callCount(4);
       stub.restore();
     });
   });

@@ -207,6 +207,7 @@
       breakpoint = this.findClosestBreakpoint(width);
       if (breakpoint != this.currentBreakpoint) {
         this.setBreakpoint(breakpoint);
+
         this.refreshImages();
       }
     },
@@ -271,7 +272,7 @@
      * @param {HTMLElement} the element to test
      * @return {Boolean} whether or not the element is visible
      * @api public
-     */
+    */
     isElementVisible: function(el) {
       if (!(el && el instanceof HTMLElement))
         throw new Error("Responsify.isElementVisible(): expects parameter el of type HTMLElement");
@@ -287,8 +288,11 @@
      * @param {HTMLElement} the element to test
      * @return {Boolean} whether or not the element is in viewport
      * @api public
-     */
+    */
     isElementInViewport: function(el) {
+      if (!(el && el instanceof HTMLElement))
+        throw new Error("Responsify.isElementInViewport(): expects parameter el of type HTMLElement");
+
       var rect = el.getBoundingClientRect();
       var html = document.documentElement;
       return (
@@ -296,6 +300,44 @@
         rect.left >= 0 &&
         rect.right <= (window.innerWidth || html.clientWidth)
       );
+    },
+    /**
+     * Return whether or not image src would be downscaled
+     *
+     * @example
+     *     Responsify.isElementToBeDownscaled(<HTMLElement>)
+     *
+     * @param {HTMLElement} the element to test
+     * @return {Boolean} whether or not the image could be downscaled
+     * @api public
+    */
+    isElementToBeDownscaled: function(el) {
+      var url = "",
+          img;
+
+      // typecheck
+      if (!(el && el instanceof HTMLElement))
+        throw new Error("Responsify.isElementBeingDownscaled(): expects parameter el of type HTMLElement");
+
+      // element is an image
+      if (el.nodeName.toLowerCase() === 'img') {
+        if (el.naturalWidth > el.parentElement.clientWidth)
+          return true;
+      }
+      // element is a div
+      else if (el.nodeName.toLowerCase() === 'div'){
+        // extract real url from style syntax
+        url = /^url\((['"]?)(.*)\1\)$/.exec(el.style.backgroundImage);
+        url = url ? url[2] : "";
+        img = new Image();
+        img.src = url;
+
+        if (img.naturalWidth > el.parentElement.clientWidth)
+          return true;
+
+      } else {
+        throw new Error("Responsify.isElementBeingDownscaled(): element is not a div or an img");
+      }
     },
     /**
      * Render an Array or NodeList of images that are visible
@@ -321,6 +363,7 @@
      *     Responsify.renderImage(<HTMLElement>)
      *
      * @param {HTMLElement} el the element to render
+     * @return {Boolean} whether or not the image was rendered
      * @api public
      */
     renderImage: function(el) {
@@ -344,14 +387,13 @@
       if (this.options.lazyload && !this.isElementInViewport(el))
         return false;
 
+      // downscale test
+      if (this.isElementToBeDownscaled(el))
+        return false;
+
       // read in base URI and current breakpoint URI from data attributes
       baseURI = el.getAttribute('data-' + this.options.namespace) || "";
       breakpointURI = el.getAttribute("data-" + this.options.namespace + "-" + this.currentBreakpoint.label) || "";
-
-      // downscale if image is smaller and there is not a specific breakpoint
-      if (el.naturalWidth > el.clientWidth && breakpointURI !== "") {
-        return false;
-      }
 
       // combine baseURI and breakpoint data
       imageURI = this.buildImageURI(baseURI, breakpointURI);
@@ -370,6 +412,8 @@
 
       // notify subscribers
       this.publish('responsify:image:rendered', el);
+
+      return true;
     },
     /**
      * Interpolate all placeholders by applying interpolation function
